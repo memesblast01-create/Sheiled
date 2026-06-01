@@ -5,252 +5,253 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ScreenGuard Pro</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap');
-:root {
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
   --bg:#04080f;--bg2:#080e1a;--bg3:#0c1525;--border:#162240;--border2:#1e3358;
   --accent:#3b82f6;--accent2:#60a5fa;--red:#ef4444;--red2:#f87171;
   --green:#22c55e;--text:#e2e8f0;--text2:#94a3b8;--text3:#475569;
-  --glow:rgba(59,130,246,0.15);--glow-red:rgba(239,68,68,0.15);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:0.25;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(59,130,246,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.03) 1px,transparent 1px);background-size:48px 48px}
+.glow-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 70% 50% at 15% 50%,rgba(59,130,246,0.06) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 85% 20%,rgba(99,102,241,0.04) 0%,transparent 60%)}
 
-/* ── SCREENS ── */
-.screen{display:none;position:fixed;inset:0;z-index:100}
-.screen.active{display:flex;align-items:center;justify-content:center}
-.screen-bg{position:absolute;inset:0;background:var(--bg)}
-.screen-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 50%,rgba(59,130,246,0.07) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 30%,rgba(99,102,241,0.05) 0%,transparent 60%)}
-.screen-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px);background-size:50px 50px}
+/* SCREENS */
+.screen{display:none;position:fixed;inset:0;z-index:10;align-items:center;justify-content:center;flex-direction:column}
+.screen.show{display:flex}
 
-/* ── AUTH CARD ── */
-.auth-box{position:relative;z-index:2;width:420px;max-width:94vw}
-.auth-logo{text-align:center;margin-bottom:32px}
-.logo-icon{width:62px;height:62px;border-radius:18px;background:linear-gradient(135deg,#1e3a8a,#1d4ed8);border:1px solid rgba(59,130,246,0.35);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 0 50px rgba(59,130,246,0.25)}
-.auth-logo h1{font-size:24px;font-weight:700;letter-spacing:-0.5px}
-.auth-logo p{font-size:11px;color:var(--text3);letter-spacing:2px;margin-top:5px;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+/* LANDING */
+#screenLanding .inner{position:relative;z-index:2;text-align:center;padding:0 20px}
+.brand-icon{width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#1e3a8a,#1d4ed8);border:1px solid rgba(59,130,246,0.4);display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 0 60px rgba(59,130,246,0.25)}
+#screenLanding h1{font-size:32px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px}
+#screenLanding h1 span{color:var(--accent2)}
+#screenLanding p{font-size:13px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:40px}
+.land-btn{display:inline-flex;align-items:center;gap:10px;padding:15px 32px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.land-btn:hover{background:var(--accent2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(59,130,246,0.35)}
 
-/* ── USER LIST (login screen) ── */
-.user-list-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px}
-.user-list{display:flex;flex-direction:column;gap:8px}
-.user-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
-.user-item:hover{border-color:var(--border2);background:var(--bg3);transform:translateX(4px)}
-.user-item.dev-item:hover{border-color:rgba(59,130,246,0.45)}
-.user-avatar{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace}
-.dev-avatar{background:linear-gradient(135deg,#1e3a8a,#1d4ed8);border:1px solid rgba(59,130,246,0.3);color:#93c5fd}
-.user-avatar-reg{background:var(--bg3);border:1px solid var(--border2);color:var(--text2)}
-.user-info{flex:1}
-.user-name{font-size:14px;font-weight:600;color:var(--text)}
-.user-role{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px}
-.dev-badge{font-family:'JetBrains Mono',monospace;font-size:9px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);color:var(--accent2);padding:3px 9px;border-radius:4px;letter-spacing:1px;text-transform:uppercase}
-.chevron{color:var(--text3);transition:transform 0.2s;flex-shrink:0}
-.user-item:hover .chevron{transform:translateX(3px);color:var(--accent2)}
-.loading-users{text-align:center;padding:28px 20px;color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
+/* USER SELECT */
+#screenUsers .inner{position:relative;z-index:2;width:460px;max-width:94vw}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);cursor:pointer;margin-bottom:20px;font-family:'JetBrains Mono',monospace;letter-spacing:1px;transition:color 0.2s;background:none;border:none;padding:0}
+.back-link:hover{color:var(--accent2)}
+.screen-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.screen-sub{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px}
+.user-cards{display:flex;flex-direction:column;gap:10px}
+.user-card{display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.2s}
+.user-card:hover{border-color:var(--border2);transform:translateX(5px)}
+.user-card.is-admin:hover{border-color:rgba(59,130,246,0.5)}
+.ucard-avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.av-admin{background:linear-gradient(135deg,#1e3a8a,#1d4ed8);border:1px solid rgba(59,130,246,0.35);color:#93c5fd}
+.av-user{background:var(--bg3);border:1px solid var(--border2);color:var(--text2)}
+.ucard-name{font-size:15px;font-weight:600;color:var(--text)}
+.ucard-role{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.admin-badge{font-family:'JetBrains Mono',monospace;font-size:9px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);color:var(--accent2);padding:3px 9px;border-radius:5px;letter-spacing:1.5px;flex-shrink:0}
+.ucard-arrow{color:var(--text3);transition:all 0.2s;flex-shrink:0}
+.user-card:hover .ucard-arrow{transform:translateX(4px);color:var(--accent2)}
+.loading-msg{text-align:center;padding:28px;color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:12px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin-right:6px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── PASSWORD MODAL ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(4,8,15,0.88);backdrop-filter:blur(10px);z-index:300;align-items:center;justify-content:center}
-.modal-overlay.show{display:flex}
-.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:32px;width:380px;max-width:92vw;box-shadow:0 0 80px rgba(0,0,0,0.7);animation:slideUp 0.2s ease}
-@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-box h3{font-size:17px;font-weight:600;margin-bottom:4px}
-.modal-box .modal-sub{font-size:12px;color:var(--text3);margin-bottom:24px;font-family:'JetBrains Mono',monospace}
+/* PASSWORD */
+#screenPassword .inner{position:relative;z-index:2;width:400px;max-width:94vw}
+.pw-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:32px;box-shadow:0 0 80px rgba(0,0,0,0.5)}
+.pw-user-row{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.pw-avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.pw-name{font-size:16px;font-weight:600}
+.pw-role{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px}
 .field{margin-bottom:14px}
-.field label{display:block;font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+.field label{display:block;font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:7px}
 .field input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;outline:none;transition:border-color 0.2s}
 .field input:focus{border-color:var(--accent)}
-.field input.error{border-color:var(--red)}
-.btn-row{display:flex;gap:10px;margin-top:20px}
-.btn{flex:1;padding:12px;border-radius:8px;border:none;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.2px}
+.field input.shake{animation:shake 0.3s ease;border-color:var(--red)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.alert{font-size:11px;font-family:'JetBrains Mono',monospace;padding:9px 12px;border-radius:7px;margin-bottom:12px;display:none}
+.alert.show{display:block}
+.alert-err{color:var(--red2);background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2)}
+.alert-ok{color:#4ade80;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2)}
+.btn-row{display:flex;gap:10px;margin-top:18px}
+.btn{flex:1;padding:12px;border-radius:8px;border:none;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s}
 .btn:disabled{opacity:0.5;cursor:not-allowed}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-primary:hover:not(:disabled){background:var(--accent2);transform:translateY(-1px)}
 .btn-ghost{background:var(--bg3);border:1px solid var(--border2);color:var(--text2)}
 .btn-ghost:hover{border-color:var(--accent);color:var(--text)}
-.alert{font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:10px;padding:9px 12px;border-radius:6px;display:none}
-.alert.show{display:block}
-.alert-error{color:var(--red2);background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2)}
-.alert-success{color:#4ade80;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2)}
 
-/* ── MAIN APP ── */
-#mainApp{display:none;min-height:100vh;padding-bottom:60px}
-.topnav{display:flex;align-items:center;justify-content:space-between;padding:15px 28px;border-bottom:1px solid var(--border);background:rgba(8,14,26,0.9);backdrop-filter:blur(14px);position:sticky;top:0;z-index:50}
+/* MAIN APP */
+#mainApp{display:none;min-height:100vh;padding-bottom:60px;position:relative;z-index:2}
+.topnav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:rgba(4,8,15,0.92);backdrop-filter:blur(16px);position:sticky;top:0;z-index:50}
 .nav-brand{display:flex;align-items:center;gap:10px}
 .nav-logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#1e3a8a,#1d4ed8);display:flex;align-items:center;justify-content:center;border:1px solid rgba(59,130,246,0.25)}
-.nav-title{font-size:15px;font-weight:700;letter-spacing:-0.3px}
+.nav-title{font-size:15px;font-weight:700}
 .nav-sub{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:1px}
-.nav-right{display:flex;align-items:center;gap:12px}
-.user-pill{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;font-size:13px;font-weight:500}
-.pill-avatar{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#1e3a8a,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#93c5fd;font-family:'JetBrains Mono',monospace}
-.logout-btn{padding:7px 14px;background:transparent;border:1px solid var(--border2);border-radius:7px;color:var(--text3);font-family:'Space Grotesk',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s}
-.logout-btn:hover{border-color:var(--red);color:var(--red2)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.user-chip{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 7px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;font-size:13px;font-weight:500}
+.chip-av{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#1e3a8a,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#93c5fd;font-family:'JetBrains Mono',monospace}
+.nav-btn{padding:7px 14px;background:transparent;border:1px solid var(--border2);border-radius:7px;color:var(--text3);font-family:'Space Grotesk',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s}
+.nav-btn:hover{border-color:var(--red);color:var(--red2)}
 
-/* ── MASTER STRIP ── */
-.master-strip{margin:22px 28px 0;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;position:relative;overflow:hidden;transition:border-color 0.4s,box-shadow 0.4s;flex-wrap:wrap}
-.master-strip::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,var(--glow),transparent);opacity:0;transition:opacity 0.4s}
-.master-strip.active{border-color:rgba(239,68,68,0.4);box-shadow:0 0 50px rgba(239,68,68,0.1)}
-.master-strip.active::before{background:linear-gradient(90deg,var(--glow-red),transparent);opacity:1}
-.ms-left{position:relative;z-index:1}
-.ms-status{display:flex;align-items:center;gap:9px;margin-bottom:4px}
-.live-dot{width:9px;height:9px;border-radius:50%;background:var(--text3);transition:all 0.4s;flex-shrink:0}
-.live-dot.on{background:var(--red);box-shadow:0 0 10px var(--red);animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.8)}}
-.ms-label{font-size:14px;font-weight:600;color:var(--text2);transition:color 0.3s}
-.master-strip.active .ms-label{color:var(--red2)}
-.ms-desc{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px}
-.ms-right{position:relative;z-index:1;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.toggle-sw{position:relative;width:54px;height:30px;cursor:pointer;flex-shrink:0}
-.toggle-sw input{opacity:0;width:0;height:0;position:absolute}
-.toggle-track{position:absolute;inset:0;background:var(--bg3);border:1px solid var(--border2);border-radius:15px;transition:all 0.3s}
-.toggle-sw input:checked + .toggle-track{background:var(--red);border-color:var(--red);box-shadow:0 0 16px rgba(239,68,68,0.4)}
-.toggle-knob{position:absolute;top:4px;left:4px;width:20px;height:20px;background:var(--text3);border-radius:50%;transition:all 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.5)}
-.toggle-sw input:checked ~ .toggle-knob{transform:translateX(24px);background:#fff}
-.ms-mode-pills{display:flex;gap:6px}
-.mode-pill{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all 0.2s;letter-spacing:0.5px}
-.mode-pill:hover{border-color:var(--accent);color:var(--accent2)}
-.mode-pill.active-mode{background:rgba(59,130,246,0.12);border-color:var(--accent);color:var(--accent2)}
+/* MASTER STRIP */
+.master-strip{margin:22px 28px 0;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;overflow:hidden;transition:all 0.4s;flex-wrap:wrap}
+.master-strip::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.4s;background:linear-gradient(90deg,rgba(239,68,68,0.08),transparent)}
+.master-strip.on{border-color:rgba(239,68,68,0.4);box-shadow:0 0 40px rgba(239,68,68,0.08)}
+.master-strip.on::before{opacity:1}
+.ms-dot{width:9px;height:9px;border-radius:50%;background:var(--text3);transition:all 0.4s;flex-shrink:0}
+.ms-dot.on{background:var(--red);box-shadow:0 0 10px var(--red);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.ms-title{font-size:14px;font-weight:600;color:var(--text2);transition:color 0.3s}
+.master-strip.on .ms-title{color:var(--red2)}
+.ms-sub{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:3px}
+.ms-right{display:flex;align-items:center;gap:10px;position:relative;z-index:1;flex-wrap:wrap}
+.pills{display:flex;gap:5px}
+.pill{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all 0.2s}
+.pill:hover{border-color:var(--accent);color:var(--accent2)}
+.pill.on{background:rgba(59,130,246,0.12);border-color:var(--accent);color:var(--accent2)}
+.tog{position:relative;width:54px;height:30px;cursor:pointer;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tog-track{position:absolute;inset:0;background:var(--bg3);border:1px solid var(--border2);border-radius:15px;transition:all 0.3s}
+.tog input:checked+.tog-track{background:var(--red);border-color:var(--red);box-shadow:0 0 14px rgba(239,68,68,0.4)}
+.tog-knob{position:absolute;top:4px;left:4px;width:20px;height:20px;background:var(--text3);border-radius:50%;transition:all 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.4)}
+.tog input:checked~.tog-knob{transform:translateX(24px);background:#fff}
 
-/* ── STATS ── */
-.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 28px 0}
-.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
-.stat-num{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--accent2);margin-bottom:3px}
-.stat-lbl{font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 28px 0}
+.sbox{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.snum{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--accent2);margin-bottom:3px}
+.slbl{font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
 
-/* ── HOTKEY BAR ── */
-.hotkey-bar{margin:14px 28px 0;padding:10px 18px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;flex-wrap:wrap}
-.hotkey-bar kbd{background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)}
+/* BOOKMARKLET BOX */
+.bm-box{margin:16px 28px 0;background:var(--bg2);border:1px solid rgba(234,179,8,0.3);border-radius:14px;overflow:hidden}
+.bm-head{padding:14px 20px;background:rgba(234,179,8,0.06);border-bottom:1px solid rgba(234,179,8,0.15);display:flex;align-items:center;gap:10px}
+.bm-head-txt{font-size:13px;font-weight:600;color:#fbbf24}
+.bm-head-sub{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-left:auto}
+.bm-body{padding:16px 20px}
+.bm-steps{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:600px){.bm-steps{grid-template-columns:1fr}}
+.bm-step{display:flex;align-items:flex-start;gap:10px}
+.bm-num{width:22px;height:22px;border-radius:6px;background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.25);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fbbf24;font-family:'JetBrains Mono',monospace;flex-shrink:0;margin-top:1px}
+.bm-step-txt{font-size:12px;color:var(--text2);line-height:1.6;font-family:'JetBrains Mono',monospace}
+.bm-step-txt strong{color:var(--text)}
+.bm-drag-area{background:var(--bg3);border:2px dashed rgba(234,179,8,0.3);border-radius:10px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.bm-drag-hint{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;line-height:1.7}
+.bm-drag-hint strong{color:#fbbf24;display:block;margin-bottom:2px}
+.bm-link{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.35);border-radius:8px;color:#fbbf24;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:grab;text-decoration:none;white-space:nowrap;transition:all 0.2s;user-select:none}
+.bm-link:hover{background:rgba(234,179,8,0.18);transform:translateY(-1px)}
+.bm-link:active{cursor:grabbing}
 
-/* ── GRID ── */
+/* HOTKEY */
+.hkbar{margin:14px 28px 0;padding:9px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hkbar kbd{background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:1px 7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)}
+
+/* GRID */
 .app-grid{display:grid;grid-template-columns:1fr 340px;gap:18px;margin:18px 28px 0}
-@media(max-width:900px){.app-grid{grid-template-columns:1fr}}
+@media(max-width:860px){.app-grid{grid-template-columns:1fr}}
 
-/* ── PANELS ── */
+/* PANEL */
 .panel{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
 .panel:last-child{margin-bottom:0}
-.panel-header{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.panel-title{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
-.panel-badge{font-family:'JetBrains Mono',monospace;font-size:9px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--accent2);padding:2px 8px;border-radius:4px;letter-spacing:1px}
-.panel-body{padding:16px 20px}
+.ph{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ph-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.ph-badge{font-family:'JetBrains Mono',monospace;font-size:9px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--accent2);padding:2px 8px;border-radius:4px;letter-spacing:1px}
+.pb{padding:16px 20px}
 
-/* ── URL INPUT ── */
-.url-input-row{display:flex;gap:8px;margin-bottom:14px}
-.url-input-row input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color 0.2s}
-.url-input-row input:focus{border-color:var(--accent)}
-.url-input-row input::placeholder{color:var(--text3)}
-.add-url-btn{padding:10px 16px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);border-radius:8px;color:var(--accent2);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap}
-.add-url-btn:hover{background:rgba(59,130,246,0.2);border-color:var(--accent)}
-.url-list{display:flex;flex-direction:column;gap:6px}
-.url-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;animation:fadeIn 0.2s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-.url-favicon{width:22px;height:22px;border-radius:5px;background:var(--bg2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
-.url-favicon img{width:16px;height:16px;object-fit:contain}
-.url-domain{flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.url-status{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:4px;letter-spacing:1px;flex-shrink:0;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:#4ade80}
-.url-del{width:26px;height:26px;border-radius:5px;background:transparent;border:1px solid transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.15s;flex-shrink:0;line-height:1}
-.url-del:hover{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2);color:var(--red2)}
-.empty-state{text-align:center;padding:30px 20px;color:var(--text3);font-size:12px;font-family:'JetBrains Mono',monospace;line-height:2;border:1px dashed var(--border);border-radius:8px}
-
-/* ── SLIDERS ── */
-.intensity-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.int-label{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;width:90px;flex-shrink:0}
-.int-val{font-size:12px;color:var(--accent2);font-family:'JetBrains Mono',monospace;width:24px;text-align:right;flex-shrink:0}
+/* SLIDERS */
+.sl-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.sl-lbl{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;width:88px;flex-shrink:0}
+.sl-val{font-size:12px;color:var(--accent2);font-family:'JetBrains Mono',monospace;width:24px;text-align:right;flex-shrink:0}
 input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:var(--border2);border-radius:2px;outline:none;cursor:pointer;flex:1}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 8px rgba(59,130,246,0.5);cursor:pointer}
 
-/* ── RIGHT COL ── */
-.right-col{display:flex;flex-direction:column;gap:0}
-.dev-panel{background:var(--bg2);border:1px solid rgba(59,130,246,0.25);border-radius:14px;overflow:hidden;display:none;margin-bottom:16px}
+/* DEV PANEL */
+.dev-panel{background:var(--bg2);border:1px solid rgba(59,130,246,0.25);border-radius:14px;overflow:hidden;margin-bottom:16px;display:none}
 .dev-panel.show{display:block}
-.dev-header{padding:14px 18px;background:rgba(59,130,246,0.06);border-bottom:1px solid rgba(59,130,246,0.15);display:flex;align-items:center;gap:8px}
-.dev-header-text{font-size:12px;font-weight:600;color:var(--accent2)}
-.dev-header-sub{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-left:auto}
+.dev-head{padding:13px 18px;background:rgba(59,130,246,0.06);border-bottom:1px solid rgba(59,130,246,0.15);display:flex;align-items:center;gap:8px}
+.dev-head-txt{font-size:12px;font-weight:600;color:var(--accent2)}
+.dev-head-sub{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-left:auto}
 .dev-body{padding:16px 18px}
-.add-user-form{display:flex;flex-direction:column;gap:10px}
-.small-field label{display:block;font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
-.small-field input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color 0.2s}
-.small-field input:focus{border-color:var(--accent)}
-.small-field input::placeholder{color:var(--text3)}
-.add-user-btn-dev{width:100%;padding:11px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);border-radius:7px;color:var(--accent2);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:4px}
-.add-user-btn-dev:hover:not(:disabled){background:rgba(59,130,246,0.2)}
-.add-user-btn-dev:disabled{opacity:0.5;cursor:not-allowed}
-.managed-users{margin-top:16px}
-.managed-title{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-.managed-item{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border-radius:7px;margin-bottom:4px;background:var(--bg3);border:1px solid var(--border)}
-.mi-info{display:flex;flex-direction:column;gap:1px}
-.mi-name{font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace}
-.mi-email{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace}
-.mi-del{width:24px;height:24px;background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:15px;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;line-height:1}
-.mi-del:hover{background:rgba(239,68,68,0.1);color:var(--red2)}
+.tab-bar{display:flex;gap:4px;margin-bottom:16px;background:var(--bg3);border-radius:8px;padding:4px}
+.tab-btn{flex:1;padding:7px 8px;border-radius:6px;border:none;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;color:var(--text3);background:transparent}
+.tab-btn.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.sf{margin-bottom:10px}
+.sf label{display:block;font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.sf input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color 0.2s}
+.sf input:focus{border-color:var(--accent)}
+.sf input::placeholder{color:var(--text3)}
+.dev-btn{width:100%;padding:10px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);border-radius:7px;color:var(--accent2);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:6px}
+.dev-btn:hover:not(:disabled){background:rgba(59,130,246,0.2)}
+.dev-btn:disabled{opacity:0.5;cursor:not-allowed}
+.mu-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.mu-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:var(--bg3);border:1px solid var(--border)}
+.mu-av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);flex-shrink:0}
+.mu-name{font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace;font-weight:500;flex:1}
+.mu-del{width:26px;height:26px;background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:16px;border-radius:5px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0}
+.mu-del:hover{background:rgba(239,68,68,0.1);color:var(--red2)}
 
-/* ── OVERLAY ── */
-#screenOverlay{position:fixed;inset:0;pointer-events:none;z-index:9000;display:none;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,0.07) 0px,rgba(0,0,0,0.07) 1px,transparent 1px,transparent 3px)}
-
-/* ── FB STATUS ── */
-#fbStatus{position:fixed;bottom:16px;right:16px;font-family:'JetBrains Mono',monospace;font-size:10px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text3);z-index:9998;transition:all 0.3s;letter-spacing:0.5px}
-#fbStatus.ok{color:#4ade80;border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)}
-#fbStatus.err{color:var(--red2);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.06)}
+/* OVERLAY on THIS page when filter active */
+#overlay{position:fixed;inset:0;pointer-events:none;z-index:9998;display:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.06) 0px,rgba(0,0,0,0.06) 1px,transparent 1px,transparent 3px)}
+#st{position:fixed;bottom:14px;right:14px;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text3);z-index:9999;transition:all 0.3s;letter-spacing:0.5px}
+#st.ok{color:#4ade80;border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.05)}
+#st.err{color:var(--red2);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.06)}
 </style>
 </head>
 <body>
+<div class="grid-bg"></div>
+<div class="glow-bg"></div>
+<div id="overlay"></div>
+<div id="st"><span class="spin"></span> Connecting...</div>
 
-<div id="screenOverlay"></div>
-<div id="fbStatus"><span class="spinner"></span> Connecting...</div>
-
-<!-- ══════════════ SCREEN 1: USER SELECT ══════════════ -->
-<div id="screenSelect" class="screen active">
-  <div class="screen-bg"></div>
-  <div class="screen-glow"></div>
-  <div class="screen-grid"></div>
-  <div class="auth-box">
-    <div class="auth-logo">
-      <div class="logo-icon">
-        <svg width="30" height="30" viewBox="0 0 28 28" fill="none">
-          <path d="M14 3L5 7V14C5 19.5 9 24.5 14 26C19 24.5 23 19.5 23 14V7L14 3Z" stroke="#60a5fa" stroke-width="1.5" fill="rgba(59,130,246,0.12)"/>
-          <path d="M10 14L13 17L18 11" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <h1>ScreenGuard Pro</h1>
-      <p>Display Filter System</p>
+<!-- LANDING -->
+<div id="screenLanding" class="screen show">
+  <div class="inner">
+    <div class="brand-icon">
+      <svg width="34" height="34" viewBox="0 0 28 28" fill="none">
+        <path d="M14 3L5 7V14C5 19.5 9 24.5 14 26C19 24.5 23 19.5 23 14V7L14 3Z" stroke="#60a5fa" stroke-width="1.5" fill="rgba(59,130,246,0.15)"/>
+        <path d="M10 14L13 17L18 11" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
-    <div class="user-list-title">Select your account</div>
-    <div class="user-list" id="userList">
-      <div class="loading-users"><span class="spinner"></span>Loading accounts...</div>
-    </div>
+    <h1>Screen<span>Guard</span> Pro</h1>
+    <p>Display Filter System · Control Room</p>
+    <button class="land-btn" id="landBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Login to Use
+    </button>
   </div>
 </div>
 
-<!-- ══════════════ SCREEN 2: PASSWORD ══════════════ -->
+<!-- USER LIST -->
+<div id="screenUsers" class="screen">
+  <div class="inner">
+    <button class="back-link" id="backToLand">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back
+    </button>
+    <div class="screen-title">Select Account</div>
+    <div class="screen-sub">Choose your profile to continue</div>
+    <div class="user-cards" id="userCards"><div class="loading-msg"><span class="spin"></span>Loading accounts...</div></div>
+  </div>
+</div>
+
+<!-- PASSWORD -->
 <div id="screenPassword" class="screen">
-  <div class="screen-bg"></div>
-  <div class="screen-glow"></div>
-  <div class="screen-grid"></div>
-  <div class="auth-box">
-    <div class="auth-logo">
-      <div class="logo-icon">
-        <svg width="30" height="30" viewBox="0 0 28 28" fill="none">
-          <path d="M14 3L5 7V14C5 19.5 9 24.5 14 26C19 24.5 23 19.5 23 14V7L14 3Z" stroke="#60a5fa" stroke-width="1.5" fill="rgba(59,130,246,0.12)"/>
-          <path d="M10 14L13 17L18 11" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+  <div class="inner">
+    <button class="back-link" id="backToUsers">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back
+    </button>
+    <div class="pw-card">
+      <div class="pw-user-row">
+        <div class="pw-avatar" id="pwAv"></div>
+        <div><div class="pw-name" id="pwName"></div><div class="pw-role" id="pwRole"></div></div>
       </div>
-      <h1 id="pwScreenTitle">Welcome back</h1>
-      <p id="pwScreenSub">Enter your password</p>
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="pwInput" placeholder="••••••••">
-    </div>
-    <div class="alert alert-error" id="pwError"></div>
-    <div class="btn-row">
-      <button class="btn btn-ghost" id="backBtn">← Back</button>
-      <button class="btn btn-primary" id="signInBtn">Sign in</button>
+      <div class="alert alert-err" id="pwErr"></div>
+      <div class="field"><label>Password</label><input type="password" id="pwInput" placeholder="Enter your password"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="backBtn2">← Back</button>
+        <button class="btn btn-primary" id="signInBtn">Sign in</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════ MAIN APP ══════════════ -->
+<!-- MAIN APP -->
 <div id="mainApp">
   <nav class="topnav">
     <div class="nav-brand">
@@ -260,545 +261,459 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <path d="M10 14L13 17L18 11" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
-      <div>
-        <div class="nav-title">ScreenGuard Pro</div>
-        <div class="nav-sub">Display Filter System</div>
-      </div>
+      <div><div class="nav-title">ScreenGuard Pro</div><div class="nav-sub">Display Filter System</div></div>
     </div>
     <div class="nav-right">
-      <div class="user-pill">
-        <div class="pill-avatar" id="navAvatar">?</div>
-        <span id="navName">User</span>
-      </div>
-      <button class="logout-btn" id="logoutBtn">Sign out</button>
+      <div class="user-chip"><div class="chip-av" id="navAv">?</div><span id="navName">User</span></div>
+      <button class="nav-btn" id="logoutBtn">Sign out</button>
     </div>
   </nav>
 
-  <div class="master-strip" id="masterStrip">
-    <div class="ms-left">
-      <div class="ms-status">
-        <div class="live-dot" id="liveDot"></div>
-        <span class="ms-label" id="msLabel">Filter Inactive</span>
+  <!-- MASTER TOGGLE -->
+  <div class="master-strip" id="mstrip">
+    <div style="position:relative;z-index:1">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:3px">
+        <div class="ms-dot" id="msDot"></div>
+        <span class="ms-title" id="msTitle">Filter Inactive</span>
       </div>
-      <div class="ms-desc" id="msDesc">Enable to apply display filter across all open tabs</div>
+      <div class="ms-sub" id="msSub">Toggle ON then click the bookmarklet on any tab</div>
     </div>
     <div class="ms-right">
-      <div class="ms-mode-pills">
-        <button class="mode-pill active-mode" data-m="stealth">Stealth</button>
-        <button class="mode-pill" data-m="dark">Blackout</button>
-        <button class="mode-pill" data-m="blur">Blur</button>
+      <div class="pills">
+        <button class="pill on" data-m="stealth">Stealth</button>
+        <button class="pill" data-m="dark">Blackout</button>
+        <button class="pill" data-m="blur">Blur</button>
       </div>
-      <label class="toggle-sw">
-        <input type="checkbox" id="masterToggle">
-        <div class="toggle-track"></div>
-        <div class="toggle-knob"></div>
+      <label class="tog">
+        <input type="checkbox" id="masterTog">
+        <div class="tog-track"></div>
+        <div class="tog-knob"></div>
       </label>
     </div>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-box"><div class="stat-num" id="statSites">0</div><div class="stat-lbl">Sites Watched</div></div>
-    <div class="stat-box"><div class="stat-num" id="statMode">OFF</div><div class="stat-lbl">Filter Mode</div></div>
-    <div class="stat-box"><div class="stat-num" id="statIntensity">6</div><div class="stat-lbl">Intensity</div></div>
+  <!-- STATS -->
+  <div class="stats">
+    <div class="sbox"><div class="snum" id="stMode">OFF</div><div class="slbl">Filter Mode</div></div>
+    <div class="sbox"><div class="snum" id="stInt">6</div><div class="slbl">Intensity</div></div>
+    <div class="sbox"><div class="snum" id="stBlur">3</div><div class="slbl">Blur Radius</div></div>
   </div>
 
-  <div class="hotkey-bar">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-    Quick toggle: <kbd>Space</kbd> &nbsp;·&nbsp; <kbd>Ctrl+H</kbd>
-    &nbsp;&nbsp;·&nbsp;&nbsp; Broadcasts filter to all tabs in this browser session
-  </div>
-
-  <div class="app-grid">
-    <!-- LEFT -->
-    <div>
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            Monitored Sites
-          </div>
-          <span class="panel-badge" id="urlCountBadge">0 ACTIVE</span>
-        </div>
-        <div class="panel-body">
-          <div class="url-input-row">
-            <input type="text" id="urlInput" placeholder="Paste any URL  e.g. youtube.com or https://claude.ai">
-            <button class="add-url-btn" id="addUrlBtn">+ Add</button>
-          </div>
-          <div class="url-list" id="urlList">
-            <div class="empty-state">No sites added yet.<br>Paste a URL above to start monitoring it.</div>
-          </div>
-        </div>
+  <!-- BOOKMARKLET SECTION -->
+  <div class="bm-box">
+    <div class="bm-head">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      <span class="bm-head-txt">Bookmarklet — Apply Filter to ANY Tab</span>
+      <span class="bm-head-sub">DRAG TO BOOKMARKS BAR</span>
+    </div>
+    <div class="bm-body">
+      <div class="bm-steps">
+        <div class="bm-step"><div class="bm-num">1</div><div class="bm-step-txt"><strong>Toggle filter ON</strong> using the switch above and pick your mode</div></div>
+        <div class="bm-step"><div class="bm-num">2</div><div class="bm-step-txt"><strong>Drag the button below</strong> to your browser bookmarks bar</div></div>
+        <div class="bm-step"><div class="bm-num">3</div><div class="bm-step-txt"><strong>Go to any tab</strong> — YouTube, Claude, anything</div></div>
+        <div class="bm-step"><div class="bm-num">4</div><div class="bm-step-txt"><strong>Click the bookmark</strong> to instantly apply or remove filter</div></div>
       </div>
-
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-            Filter Settings
-          </div>
+      <div class="bm-drag-area">
+        <div class="bm-drag-hint">
+          <strong>⬇ Drag this to your bookmarks bar</strong>
+          Shows bookmarks bar: <kbd style="background:var(--bg2);border:1px solid var(--border2);border-radius:3px;padding:1px 6px;font-family:JetBrains Mono,monospace;font-size:10px;color:var(--text2)">Ctrl+Shift+B</kbd>
         </div>
-        <div class="panel-body">
-          <div class="intensity-row">
-            <span class="int-label">Intensity</span>
-            <input type="range" id="intensityRange" min="1" max="10" value="6">
-            <span class="int-val" id="intVal">6</span>
-          </div>
-          <div class="intensity-row">
-            <span class="int-label">Blur Radius</span>
-            <input type="range" id="blurRange" min="0" max="10" value="3">
-            <span class="int-val" id="blurVal">3</span>
+        <a id="bmLink" href="#" class="bm-link" onclick="return false;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          ScreenGuard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOTKEY -->
+  <div class="hkbar">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Toggle this page: <kbd>Space</kbd> &nbsp;·&nbsp; <kbd>Ctrl+H</kbd>
+    &nbsp;·&nbsp; Then click bookmarklet on each tab you want filtered
+  </div>
+
+  <!-- GRID -->
+  <div class="app-grid">
+    <div>
+      <!-- FILTER SETTINGS -->
+      <div class="panel">
+        <div class="ph"><div class="ph-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>Filter Settings</div></div>
+        <div class="pb">
+          <div class="sl-row"><span class="sl-lbl">Intensity</span><input type="range" id="intR" min="1" max="10" value="6"><span class="sl-val" id="intV">6</span></div>
+          <div class="sl-row"><span class="sl-lbl">Blur Radius</span><input type="range" id="blurR" min="0" max="10" value="3"><span class="sl-val" id="blurV">3</span></div>
+          <div style="margin-top:4px;padding:10px 12px;background:var(--bg3);border-radius:8px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;line-height:1.8">
+            Adjusting sliders updates the bookmarklet in real-time.<br>
+            Re-click the bookmarklet on any tab to apply new settings.
           </div>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT -->
-    <div class="right-col">
-      <!-- DEVELOPER PANEL -->
+    <div>
+      <!-- DEV PANEL -->
       <div class="dev-panel" id="devPanel">
-        <div class="dev-header">
+        <div class="dev-head">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span class="dev-header-text">User Management</span>
-          <span class="dev-header-sub">ADMIN ONLY</span>
+          <span class="dev-head-txt">Admin Panel</span>
+          <span class="dev-head-sub">DEVELOPER ONLY</span>
         </div>
         <div class="dev-body">
-          <div class="add-user-form">
-            <div class="small-field"><label>Display Name</label><input type="text" id="newUserName" placeholder="e.g. Operator 1"></div>
-            <div class="small-field"><label>Email</label><input type="email" id="newUserEmail" placeholder="user@example.com"></div>
-            <div class="small-field"><label>Password</label><input type="password" id="newUserPw" placeholder="Min 6 characters"></div>
-            <button class="add-user-btn-dev" id="addUserBtn">+ Add User</button>
-            <div class="alert alert-success" id="addSuccessMsg">✓ User created successfully</div>
-            <div class="alert alert-error" id="addErrorMsg"></div>
+          <div class="tab-bar">
+            <button class="tab-btn active" data-tab="addUser">Add User</button>
+            <button class="tab-btn" data-tab="manageUsers">Users</button>
+            <button class="tab-btn" data-tab="changePw">Password</button>
           </div>
-          <div class="managed-users">
-            <div class="managed-title">Active Users</div>
-            <div id="managedUserList"><div style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;padding:4px 2px">Loading...</div></div>
+          <!-- Add User -->
+          <div class="tab-content active" id="tab-addUser">
+            <div class="sf"><label>Display Name</label><input type="text" id="nuName" placeholder="e.g. Operator 1"></div>
+            <div class="sf"><label>Email</label><input type="email" id="nuEmail" placeholder="user@example.com"></div>
+            <div class="sf"><label>Password</label><input type="password" id="nuPw" placeholder="Min 6 characters"></div>
+            <button class="dev-btn" id="addUserBtn">+ Add User</button>
+            <div class="alert alert-ok" id="addOk" style="margin-top:10px"></div>
+            <div class="alert alert-err" id="addErr" style="margin-top:10px"></div>
+          </div>
+          <!-- Manage Users -->
+          <div class="tab-content" id="tab-manageUsers">
+            <div id="muList"><div class="loading-msg"><span class="spin"></span></div></div>
+          </div>
+          <!-- Change Password -->
+          <div class="tab-content" id="tab-changePw">
+            <div class="sf"><label>Current Password</label><input type="password" id="cpCur" placeholder="Current password"></div>
+            <div class="sf"><label>New Password</label><input type="password" id="cpNew" placeholder="New password (min 6 chars)"></div>
+            <div class="sf"><label>Confirm New</label><input type="password" id="cpCon" placeholder="Repeat new password"></div>
+            <button class="dev-btn" id="changePwBtn">Update Password</button>
+            <div class="alert alert-ok" id="cpOk" style="margin-top:10px"></div>
+            <div class="alert alert-err" id="cpErr" style="margin-top:10px"></div>
           </div>
         </div>
       </div>
 
       <!-- HOW IT WORKS -->
       <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-            How It Works
-          </div>
-        </div>
-        <div class="panel-body" style="font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;line-height:2.1">
-          1. Add websites to monitor<br>
-          2. Toggle the filter switch ON<br>
-          3. Open those sites in other tabs<br>
-          4. Filter applies automatically<br><br>
-          <span style="color:var(--text2)">Auth:</span> Firebase Authentication<br>
-          <span style="color:var(--text2)">Sync:</span> Firestore Database<br>
-          <span style="color:var(--text2)">Broadcast:</span> BroadcastChannel API
+        <div class="ph"><div class="ph-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>How It Works</div></div>
+        <div class="pb" style="font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;line-height:2.1">
+          The bookmarklet injects a filter<br>
+          directly into any tab you click it on.<br><br>
+          <span style="color:var(--text2)">Works on:</span> YouTube, Claude,<br>
+          Gmail, any website.<br><br>
+          <span style="color:var(--text2)">Toggle OFF</span> = click bookmarklet<br>
+          again to remove filter from that tab.
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Firebase Compat SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <script>
-// ══════════════════════════════════════════════
-//  FIREBASE CONFIG
-// ══════════════════════════════════════════════
-const firebaseConfig = {
-  apiKey: "AIzaSyCdQMCQUmYsnyy817fqXOO09MscKhE-4Cw",
-  authDomain: "screengaurd.firebaseapp.com",
-  projectId: "screengaurd",
-  storageBucket: "screengaurd.firebasestorage.app",
-  messagingSenderId: "662319329627",
-  appId: "1:662319329627:web:835ab0f3399762161d2a7e",
-  measurementId: "G-N856Z2MZWP"
-};
-// ══════════════════════════════════════════════
+const FB={apiKey:"AIzaSyCdQMCQUmYsnyy817fqXOO09MscKhE-4Cw",authDomain:"screengaurd.firebaseapp.com",projectId:"screengaurd",storageBucket:"screengaurd.firebasestorage.app",messagingSenderId:"662319329627",appId:"1:662319329627:web:835ab0f3399762161d2a7e"};
+firebase.initializeApp(FB);
+var auth=firebase.auth(), db=firebase.firestore();
 
-firebase.initializeApp(firebaseConfig);
-var auth = firebase.auth();
-var db   = firebase.firestore();
+var CU=null,CP=null,pendingEmail=null;
+var filterOn=false,filterMode='stealth',intensity=6,blurAmt=3;
 
-// ── STATE ──────────────────────────────────────
-var currentUser  = null;   // Firebase user object
-var currentProfile = null; // Firestore profile { name, isAdmin, email }
-var pendingEmail = null;   // email chosen from user list
-var filterOn     = false;
-var filterMode   = 'stealth';
-var intensity    = 6;
-var blurAmount   = 3;
-var urls         = [];
+// ── UTILS ──
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function ini(n){return n.split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2)||'?';}
+function setStatus(ok,msg){var e=document.getElementById('st');e.innerHTML=msg;e.className=ok?'ok':'err';setTimeout(function(){e.style.opacity='0.3';},5000);}
+function showAlert(id,msg){var e=document.getElementById(id);e.textContent=msg;e.classList.add('show');}
+function hideAlert(id){document.getElementById(id).classList.remove('show');}
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('show');});var el=document.getElementById(id);if(el)el.classList.add('show');document.getElementById('mainApp').style.display='none';}
+function showApp(){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('show');});document.getElementById('mainApp').style.display='block';}
 
-var bc = new BroadcastChannel('screenguard_v3');
-bc.onmessage = function(e){ if(e.data.t==='apply') applyFilterDOM(e.data.css, e.data.on); };
-
-// ── HELPERS ────────────────────────────────────
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function initials(name){ return name.split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2); }
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-  var el = document.getElementById(id);
-  if(el) el.classList.add('active');
+// ── BOOKMARKLET ──
+// This is the key: builds a self-contained JS snippet that reads filter settings
+// from localStorage (set by this page) and injects a CSS filter into the target tab.
+// Works on ANY website — no origin restriction.
+function buildBookmarklet(){
+  // The bookmarklet code — reads settings from localStorage (shared across same browser)
+  // and toggles a <style> tag on the current page
+  var code=[
+    '(function(){',
+    'var id="__sg_filter";',
+    'var ex=document.getElementById(id);',
+    'if(ex){ex.remove();return;}',  // toggle off if already applied
+    'var on=localStorage.getItem("sg_on");',
+    'if(on!=="1"){alert("ScreenGuard: Filter is OFF. Enable it first on the dashboard.");return;}',
+    'var mode=localStorage.getItem("sg_mode")||"stealth";',
+    'var intensity=parseFloat(localStorage.getItem("sg_int")||"6");',
+    'var blur=parseFloat(localStorage.getItem("sg_blur")||"3");',
+    'var t=intensity/10;',
+    'var css="";',
+    'if(mode==="stealth") css="contrast("+(1-t*0.65).toFixed(2)+") brightness("+(1-t*0.58).toFixed(2)+") saturate("+(1-t*0.88).toFixed(2)+") blur("+(blur*(t+0.3)).toFixed(1)+"px)";',
+    'if(mode==="dark") css="brightness("+(1-t*0.93).toFixed(2)+") contrast(0.38) saturate(0.08)";',
+    'if(mode==="blur") css="blur("+(blur*t*2+3).toFixed(1)+"px) brightness(0.7) contrast(0.58)";',
+    'var s=document.createElement("style");',
+    's.id=id;',
+    's.textContent="html{filter:"+css+" !important;} html *{filter:none !important;} html{filter:"+css+" !important;}";',
+    // Scanline overlay for extra obfuscation
+    'var ov=document.createElement("div");',
+    'ov.id="__sg_ov";',
+    'ov.style.cssText="position:fixed;inset:0;pointer-events:none;z-index:2147483647;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.055) 0px,rgba(0,0,0,0.055) 1px,transparent 1px,transparent 3px);";',
+    'document.head.appendChild(s);',
+    'document.body.appendChild(ov);',
+    '})();'
+  ].join('');
+  return 'javascript:'+encodeURIComponent(code);
 }
-function setFbStatus(ok, msg){
-  var el = document.getElementById('fbStatus');
-  el.innerHTML = msg;
-  el.className = ok ? 'ok' : 'err';
-  setTimeout(function(){ el.style.opacity='0.35'; }, 5000);
-}
-function showAlert(id, msg){
-  var el = document.getElementById(id);
-  el.textContent = msg;
-  el.classList.add('show');
-}
-function hideAlert(id){ document.getElementById(id).classList.remove('show'); }
 
-// ══════════════════════════════════════════════
-//  BOOT — load user list from Firestore
-// ══════════════════════════════════════════════
+function updateBookmarklet(){
+  // Save current settings to localStorage so bookmarklet can read them
+  localStorage.setItem('sg_on', filterOn?'1':'0');
+  localStorage.setItem('sg_mode', filterMode);
+  localStorage.setItem('sg_int', String(intensity));
+  localStorage.setItem('sg_blur', String(blurAmt));
+  // Update the href of the drag link
+  document.getElementById('bmLink').href = buildBookmarklet();
+}
+
+// ── BOOT ──
 async function boot(){
-  try {
-    var snap = await db.collection('users').get();
-    // If no users at all — seed the admin
-    if(snap.empty){
-      await seedAdmin();
-    } else {
-      renderUserList(snap.docs);
-    }
-    setFbStatus(true, '⬤ Firebase connected');
-  } catch(e){
-    setFbStatus(false, '⬤ Firebase error: ' + e.message);
-    document.getElementById('userList').innerHTML =
-      '<div class="loading-users" style="color:var(--red2)">Could not load users. Check Firebase setup.</div>';
-  }
-}
-
-// First-time setup: create admin account in Firebase Auth + Firestore
-async function seedAdmin(){
-  try {
-    var cred = await auth.createUserWithEmailAndPassword('admin@screenguard.local', 'admin123');
-    await db.collection('users').doc(cred.user.uid).set({
-      name: 'Developer',
-      email: 'admin@screenguard.local',
-      isAdmin: true,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    await auth.signOut();
-    var snap2 = await db.collection('users').get();
-    renderUserList(snap2.docs);
-  } catch(e){
-    // Admin already exists — just fetch users
-    var snap2 = await db.collection('users').get();
-    renderUserList(snap2.docs);
-  }
-}
-
-function renderUserList(docs){
-  var list = document.getElementById('userList');
-  list.innerHTML = '';
-  if(!docs.length){
-    list.innerHTML = '<div class="loading-users">No accounts found.</div>';
-    return;
-  }
-  // Sort: admin first
-  docs.sort(function(a,b){ return (b.data().isAdmin?1:0)-(a.data().isAdmin?1:0); });
-  docs.forEach(function(doc){
-    var u = doc.data();
-    var el = document.createElement('div');
-    el.className = 'user-item' + (u.isAdmin ? ' dev-item' : '');
-    el.innerHTML =
-      '<div class="user-avatar '+(u.isAdmin?'dev-avatar':'user-avatar-reg')+'">'+esc(initials(u.name))+'</div>'+
-      '<div class="user-info">'+
-        '<div class="user-name">'+esc(u.name)+'</div>'+
-        '<div class="user-role">'+esc(u.email)+'</div>'+
-      '</div>'+
-      (u.isAdmin?'<span class="dev-badge">ADMIN</span>':'')+
-      '<svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>';
-    el.addEventListener('click', function(){ selectUser(u.email, u.name); });
-    list.appendChild(el);
-  });
-}
-
-// ── USER SELECTED → show password screen ──────
-function selectUser(email, name){
-  pendingEmail = email;
-  document.getElementById('pwScreenTitle').textContent = 'Welcome, ' + name;
-  document.getElementById('pwScreenSub').textContent   = email;
-  document.getElementById('pwInput').value = '';
-  hideAlert('pwError');
-  showScreen('screenPassword');
-  setTimeout(function(){ document.getElementById('pwInput').focus(); }, 150);
-}
-
-// ── SIGN IN ────────────────────────────────────
-async function doSignIn(){
-  var pw  = document.getElementById('pwInput').value;
-  var btn = document.getElementById('signInBtn');
-  if(!pw){ showAlert('pwError','Please enter your password.'); return; }
-  btn.disabled = true;
-  btn.textContent = 'Signing in...';
-  hideAlert('pwError');
-  try {
-    var cred = await auth.signInWithEmailAndPassword(pendingEmail, pw);
-    // fetch profile
-    var doc = await db.collection('users').doc(cred.user.uid).get();
-    if(doc.exists){
-      currentProfile = doc.data();
-    } else {
-      currentProfile = { name: cred.user.email, email: cred.user.email, isAdmin: false };
-    }
-    currentUser = cred.user;
-    await loadAppData();
-    showApp();
-  } catch(e){
-    var msg = e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential'
-      ? 'Incorrect password. Please try again.'
-      : e.message;
-    showAlert('pwError', msg);
-    document.getElementById('pwInput').value = '';
-    document.getElementById('pwInput').focus();
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Sign in';
-  }
-}
-
-// ── LOAD APP DATA (urls) ───────────────────────
-async function loadAppData(){
-  try {
-    var snap = await db.collection('screenguard').doc('config').get();
-    if(snap.exists && snap.data().urls) urls = snap.data().urls;
-  } catch(e){ urls = []; }
-}
-
-// ── SHOW MAIN APP ──────────────────────────────
-function showApp(){
-  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-  document.getElementById('mainApp').style.display = 'block';
-  var name = currentProfile ? currentProfile.name : (currentUser ? currentUser.email : 'User');
-  document.getElementById('navName').textContent = name;
-  document.getElementById('navAvatar').textContent = initials(name);
-  if(currentProfile && currentProfile.isAdmin){
-    document.getElementById('devPanel').classList.add('show');
-    loadManagedUsers();
-  }
-  renderUrlList();
-}
-
-// ── LOGOUT ─────────────────────────────────────
-async function doLogout(){
-  filterOn = false;
-  broadcastFilter(false);
-  document.getElementById('masterToggle').checked = false;
-  document.getElementById('masterStrip').classList.remove('active');
-  document.getElementById('liveDot').classList.remove('on');
-  document.getElementById('devPanel').classList.remove('show');
-  document.getElementById('mainApp').style.display = 'none';
-  currentUser = null; currentProfile = null; urls = [];
-  await auth.signOut();
-  // Reload user list
-  var snap = await db.collection('users').get();
-  renderUserList(snap.docs);
-  showScreen('screenSelect');
-}
-
-// ══════════════════════════════════════════════
-//  FILTER ENGINE
-// ══════════════════════════════════════════════
-function buildCSS(){
-  var t = intensity/10;
-  if(filterMode==='stealth') return 'contrast('+(1-t*0.65).toFixed(2)+') brightness('+(1-t*0.55).toFixed(2)+') saturate('+(1-t*0.85).toFixed(2)+') blur('+(blurAmount*(t+0.3)).toFixed(1)+'px)';
-  if(filterMode==='dark')    return 'brightness('+(1-t*0.92).toFixed(2)+') contrast(0.4) saturate(0.1)';
-  if(filterMode==='blur')    return 'blur('+(blurAmount*t*1.8+3).toFixed(1)+'px) brightness(0.72) contrast(0.6)';
-}
-function applyFilterDOM(css, active){
-  var s = document.getElementById('__sg');
-  if(!s){ s=document.createElement('style'); s.id='__sg'; document.head.appendChild(s); }
-  s.textContent = active ? 'html{filter:'+css+'!important}' : '';
-  document.getElementById('screenOverlay').style.display = active?'block':'none';
-}
-function broadcastFilter(active){
-  var css = buildCSS();
-  bc.postMessage({t:'apply',css:css,on:active});
-  applyFilterDOM(css, active);
-}
-function toggleFilter(){
-  filterOn = document.getElementById('masterToggle').checked;
-  broadcastFilter(filterOn);
-  updateMasterUI();
-}
-function setMode(m){
-  filterMode = m;
-  document.querySelectorAll('.mode-pill').forEach(function(b){ b.classList.toggle('active-mode', b.getAttribute('data-m')===m); });
-  document.getElementById('statMode').textContent = filterOn ? {stealth:'STL',dark:'BLK',blur:'BLR'}[m] : 'OFF';
-  if(filterOn) broadcastFilter(true);
-}
-function updateMasterUI(){
-  var on = filterOn;
-  document.getElementById('masterStrip').classList.toggle('active', on);
-  document.getElementById('liveDot').classList.toggle('on', on);
-  document.getElementById('msLabel').textContent  = on ? 'Filter Active' : 'Filter Inactive';
-  document.getElementById('msDesc').textContent   = on ? 'Mode: '+filterMode+' · Broadcasting to all open tabs' : 'Enable to apply display filter across all open tabs';
-  document.getElementById('statMode').textContent = on ? {stealth:'STL',dark:'BLK',blur:'BLR'}[filterMode] : 'OFF';
-}
-
-// ══════════════════════════════════════════════
-//  URL MANAGEMENT
-// ══════════════════════════════════════════════
-function extractDomain(input){
-  try{ if(!input.includes('://')) input='https://'+input; return new URL(input).hostname.replace(/^www\./,''); }
-  catch(e){ return input.replace(/^www\./,'').split('/')[0]; }
-}
-async function addUrl(){
-  var raw = document.getElementById('urlInput').value.trim();
-  if(!raw) return;
-  var domain = extractDomain(raw);
-  if(!domain || urls.indexOf(domain)!==-1){ document.getElementById('urlInput').value=''; return; }
-  urls.push(domain);
-  document.getElementById('urlInput').value = '';
-  renderUrlList();
-  await saveUrls();
-}
-async function removeUrl(domain){
-  urls = urls.filter(function(u){ return u!==domain; });
-  renderUrlList();
-  await saveUrls();
-}
-async function saveUrls(){
-  try{ await db.collection('screenguard').doc('config').set({urls:urls},{merge:true}); }catch(e){}
-}
-function renderUrlList(){
-  var list = document.getElementById('urlList');
-  if(!urls.length){
-    list.innerHTML='<div class="empty-state">No sites added yet.<br>Paste a URL above to start monitoring it.</div>';
-    document.getElementById('statSites').textContent='0';
-    document.getElementById('urlCountBadge').textContent='0 ACTIVE';
-    return;
-  }
-  list.innerHTML='';
-  urls.forEach(function(domain){
-    var el=document.createElement('div'); el.className='url-item';
-    el.innerHTML=
-      '<div class="url-favicon"><img src="https://www.google.com/s2/favicons?sz=32&domain_url=https://'+esc(domain)+'" onerror="this.style.display=\'none\'"></div>'+
-      '<span class="url-domain">'+esc(domain)+'</span>'+
-      '<span class="url-status">WATCHING</span>'+
-      '<button class="url-del" title="Remove">×</button>';
-    el.querySelector('.url-del').addEventListener('click',function(){ removeUrl(domain); });
-    list.appendChild(el);
-  });
-  document.getElementById('statSites').textContent=urls.length;
-  document.getElementById('urlCountBadge').textContent=urls.length+' ACTIVE';
-}
-
-// ══════════════════════════════════════════════
-//  USER MANAGEMENT (Admin)
-// ══════════════════════════════════════════════
-async function loadManagedUsers(){
-  var el = document.getElementById('managedUserList');
-  el.innerHTML='<div style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;padding:4px 2px"><span class="spinner"></span> Loading...</div>';
   try{
-    var snap = await db.collection('users').get();
-    var nonAdmin = snap.docs.filter(function(d){ return !d.data().isAdmin; });
-    if(!nonAdmin.length){
-      el.innerHTML='<div style="font-size:11px;color:var(--text3);font-family:JetBrains Mono,monospace;padding:4px 2px">No users added yet.</div>';
-      return;
-    }
-    el.innerHTML='';
-    nonAdmin.forEach(function(doc){
-      var u=doc.data();
-      var item=document.createElement('div'); item.className='managed-item';
-      item.innerHTML=
-        '<div class="mi-info"><div class="mi-name">'+esc(u.name)+'</div><div class="mi-email">'+esc(u.email)+'</div></div>'+
-        '<button class="mi-del" title="Remove">×</button>';
-      item.querySelector('.mi-del').addEventListener('click',function(){ deleteUser(doc.id, u.name); });
-      el.appendChild(item);
-    });
-  }catch(e){ el.innerHTML='<div style="font-size:11px;color:var(--red2);font-family:JetBrains Mono,monospace">Error loading users.</div>'; }
+    var snap=await db.collection('users').get();
+    if(snap.empty){await seedAdmin();}else{renderCards(snap.docs);}
+    setStatus(true,'⬤ Firebase connected');
+  }catch(e){setStatus(false,'⬤ '+e.message);}
+}
+
+async function seedAdmin(){
+  try{
+    var c=await auth.createUserWithEmailAndPassword('admin@screenguard.local','admin123');
+    await db.collection('users').doc(c.user.uid).set({name:'Developer',email:'admin@screenguard.local',isAdmin:true});
+    await auth.signOut();
+  }catch(e){}
+  var snap=await db.collection('users').get();renderCards(snap.docs);
+}
+
+function renderCards(docs){
+  var el=document.getElementById('userCards');el.innerHTML='';
+  if(!docs.length){el.innerHTML='<div class="loading-msg">No accounts found.</div>';return;}
+  docs.sort(function(a,b){return (b.data().isAdmin?1:0)-(a.data().isAdmin?1:0);});
+  docs.forEach(function(doc){
+    var u=doc.data();
+    var d=document.createElement('div');
+    d.className='user-card'+(u.isAdmin?' is-admin':'');
+    d.innerHTML=
+      '<div class="ucard-avatar '+(u.isAdmin?'av-admin':'av-user')+'">'+esc(ini(u.name))+'</div>'+
+      '<div style="flex:1"><div class="ucard-name">'+esc(u.name)+'</div><div class="ucard-role">'+(u.isAdmin?'Administrator':'Operator')+'</div></div>'+
+      (u.isAdmin?'<span class="admin-badge">ADMIN</span>':'')+
+      '<svg class="ucard-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>';
+    d.addEventListener('click',function(){openPw(u.email,u.name,u.isAdmin);});
+    el.appendChild(d);
+  });
+}
+
+function openPw(email,name,isAdmin){
+  pendingEmail=email;
+  var av=document.getElementById('pwAv');
+  av.textContent=ini(name);
+  av.className='pw-avatar '+(isAdmin?'av-admin':'av-user');
+  document.getElementById('pwName').textContent=name;
+  document.getElementById('pwRole').textContent=isAdmin?'Administrator':'Operator';
+  document.getElementById('pwInput').value='';
+  hideAlert('pwErr');
+  showScreen('screenPassword');
+  setTimeout(function(){document.getElementById('pwInput').focus();},150);
+}
+
+async function doSignIn(){
+  var pw=document.getElementById('pwInput').value;
+  var btn=document.getElementById('signInBtn');
+  if(!pw){showAlert('pwErr','Please enter your password.');return;}
+  btn.disabled=true;btn.textContent='Signing in...';
+  hideAlert('pwErr');
+  try{
+    var c=await auth.signInWithEmailAndPassword(pendingEmail,pw);
+    var doc=await db.collection('users').doc(c.user.uid).get();
+    CU=c.user;CP=doc.exists?doc.data():{name:c.user.email,email:c.user.email,isAdmin:false};
+    launchApp();
+  }catch(e){
+    var m=e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'?'Incorrect password.':e.message;
+    showAlert('pwErr',m);
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwInput').classList.add('shake');
+    setTimeout(function(){document.getElementById('pwInput').classList.remove('shake');},400);
+  }finally{btn.disabled=false;btn.textContent='Sign in';}
+}
+
+function launchApp(){
+  var name=CP?CP.name:CU.email;
+  document.getElementById('navName').textContent=name;
+  document.getElementById('navAv').textContent=ini(name);
+  if(CP&&CP.isAdmin){document.getElementById('devPanel').classList.add('show');loadManagedUsers();}
+  updateBookmarklet();
+  showApp();
+}
+
+async function doLogout(){
+  filterOn=false;
+  document.getElementById('masterTog').checked=false;
+  document.getElementById('mstrip').classList.remove('on');
+  document.getElementById('msDot').classList.remove('on');
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('devPanel').classList.remove('show');
+  document.getElementById('mainApp').style.display='none';
+  localStorage.setItem('sg_on','0');
+  CU=null;CP=null;
+  await auth.signOut();
+  var snap=await db.collection('users').get();renderCards(snap.docs);
+  showScreen('screenLanding');
+}
+
+// ── FILTER ──
+function buildCSS(){
+  var t=intensity/10;
+  if(filterMode==='stealth') return 'contrast('+(1-t*0.65).toFixed(2)+') brightness('+(1-t*0.58).toFixed(2)+') saturate('+(1-t*0.88).toFixed(2)+') blur('+(blurAmt*(t+0.3)).toFixed(1)+'px)';
+  if(filterMode==='dark')    return 'brightness('+(1-t*0.93).toFixed(2)+') contrast(0.38) saturate(0.08)';
+  if(filterMode==='blur')    return 'blur('+(blurAmt*t*2+3).toFixed(1)+'px) brightness(0.7) contrast(0.58)';
+}
+
+function toggleFilter(){
+  filterOn=document.getElementById('masterTog').checked;
+  // Apply to this page too
+  var s=document.getElementById('__sg');if(!s){s=document.createElement('style');s.id='__sg';document.head.appendChild(s);}
+  s.textContent=filterOn?'html{filter:'+buildCSS()+'!important}':'';
+  document.getElementById('overlay').style.display=filterOn?'block':'none';
+  updateStripUI();
+  updateBookmarklet();
+}
+
+function setMode(m){
+  filterMode=m;
+  document.querySelectorAll('.pill').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-m')===m);});
+  document.getElementById('stMode').textContent=filterOn?{stealth:'STL',dark:'BLK',blur:'BLR'}[m]:'OFF';
+  if(filterOn){
+    var s=document.getElementById('__sg');if(s)s.textContent='html{filter:'+buildCSS()+'!important}';
+  }
+  updateBookmarklet();
+}
+
+function updateStripUI(){
+  var on=filterOn,lbl={stealth:'STL',dark:'BLK',blur:'BLR'};
+  document.getElementById('mstrip').classList.toggle('on',on);
+  document.getElementById('msDot').classList.toggle('on',on);
+  document.getElementById('msTitle').textContent=on?'Filter Active — Click bookmarklet on any tab':'Filter Inactive';
+  document.getElementById('msSub').textContent=on?'Drag the bookmark below to your bar, then click it on any tab':'Toggle ON then click the bookmarklet on any tab';
+  document.getElementById('stMode').textContent=on?lbl[filterMode]:'OFF';
+}
+
+// ── USER MANAGEMENT ──
+async function loadManagedUsers(){
+  var el=document.getElementById('muList');
+  el.innerHTML='<div class="loading-msg"><span class="spin"></span></div>';
+  var snap=await db.collection('users').get();
+  var others=snap.docs.filter(function(d){return !d.data().isAdmin;});
+  if(!others.length){el.innerHTML='<div class="loading-msg" style="color:var(--text3)">No users yet.</div>';return;}
+  var list=document.createElement('div');list.className='mu-list';
+  others.forEach(function(doc){
+    var u=doc.data();
+    var item=document.createElement('div');item.className='mu-item';
+    item.innerHTML=
+      '<div class="mu-av">'+esc(ini(u.name))+'</div>'+
+      '<div class="mu-name">'+esc(u.name)+'</div>'+
+      '<button class="mu-del">×</button>';
+    item.querySelector('.mu-del').addEventListener('click',function(){deleteUser(doc.id,u.name);});
+    list.appendChild(item);
+  });
+  el.innerHTML='';el.appendChild(list);
 }
 
 async function addUser(){
-  var name  = document.getElementById('newUserName').value.trim();
-  var email = document.getElementById('newUserEmail').value.trim();
-  var pw    = document.getElementById('newUserPw').value;
-  hideAlert('addSuccessMsg'); hideAlert('addErrorMsg');
-  if(!name||!email||!pw){ showAlert('addErrorMsg','Please fill in all fields.'); return; }
-  if(pw.length<6){ showAlert('addErrorMsg','Password must be at least 6 characters.'); return; }
-  var btn=document.getElementById('addUserBtn');
-  btn.disabled=true; btn.textContent='Creating...';
+  var name=document.getElementById('nuName').value.trim();
+  var email=document.getElementById('nuEmail').value.trim();
+  var pw=document.getElementById('nuPw').value;
+  hideAlert('addOk');hideAlert('addErr');
+  if(!name||!email||!pw){showAlert('addErr','Please fill in all fields.');return;}
+  if(pw.length<6){showAlert('addErr','Password must be at least 6 characters.');return;}
+  var btn=document.getElementById('addUserBtn');btn.disabled=true;btn.textContent='Creating...';
   try{
-    // Create in Firebase Auth using secondary app to avoid logging out admin
-    var secondApp = firebase.initializeApp(firebaseConfig, 'secondary_'+Date.now());
-    var secondAuth = secondApp.auth();
-    var cred = await secondAuth.createUserWithEmailAndPassword(email, pw);
-    await db.collection('users').doc(cred.user.uid).set({
-      name:name, email:email, isAdmin:false,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-    await secondAuth.signOut();
-    await secondApp.delete();
-    document.getElementById('newUserName').value='';
-    document.getElementById('newUserEmail').value='';
-    document.getElementById('newUserPw').value='';
-    showAlert('addSuccessMsg','✓ User "'+name+'" created successfully');
-    setTimeout(function(){ hideAlert('addSuccessMsg'); }, 4000);
+    var sa=firebase.initializeApp(FB,'sec_'+Date.now());
+    var c=await sa.auth().createUserWithEmailAndPassword(email,pw);
+    await db.collection('users').doc(c.user.uid).set({name:name,email:email,isAdmin:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await sa.auth().signOut();await sa.delete();
+    document.getElementById('nuName').value='';document.getElementById('nuEmail').value='';document.getElementById('nuPw').value='';
+    showAlert('addOk','✓ "'+name+'" added successfully');
+    setTimeout(function(){hideAlert('addOk');},4000);
     loadManagedUsers();
-    // Refresh login user list in background
-    var snap=await db.collection('users').get(); renderUserList(snap.docs);
-  }catch(e){
-    var msg = e.code==='auth/email-already-in-use' ? 'Email already in use.' : e.message;
-    showAlert('addErrorMsg', msg);
-  } finally {
-    btn.disabled=false; btn.textContent='+ Add User';
-  }
+    var snap=await db.collection('users').get();renderCards(snap.docs);
+  }catch(e){showAlert('addErr',e.code==='auth/email-already-in-use'?'Email already in use.':e.message);}
+  finally{btn.disabled=false;btn.textContent='+ Add User';}
 }
 
-async function deleteUser(uid, name){
-  if(!confirm('Remove user "'+name+'"? They will no longer be able to sign in.')) return;
-  try{
-    await db.collection('users').doc(uid).delete();
-    loadManagedUsers();
-    var snap=await db.collection('users').get(); renderUserList(snap.docs);
-  }catch(e){ alert('Error removing user: '+e.message); }
+async function deleteUser(uid,name){
+  if(!confirm('Remove "'+name+'"?'))return;
+  try{await db.collection('users').doc(uid).delete();loadManagedUsers();var snap=await db.collection('users').get();renderCards(snap.docs);}
+  catch(e){alert('Error: '+e.message);}
 }
 
-// ══════════════════════════════════════════════
-//  EVENT LISTENERS
-// ══════════════════════════════════════════════
-document.getElementById('backBtn').addEventListener('click', function(){
-  showScreen('screenSelect');
+async function changePassword(){
+  var cur=document.getElementById('cpCur').value;
+  var nw=document.getElementById('cpNew').value;
+  var cf=document.getElementById('cpCon').value;
+  hideAlert('cpOk');hideAlert('cpErr');
+  if(!cur||!nw||!cf){showAlert('cpErr','Please fill in all fields.');return;}
+  if(nw.length<6){showAlert('cpErr','New password must be at least 6 characters.');return;}
+  if(nw!==cf){showAlert('cpErr','New passwords do not match.');return;}
+  var btn=document.getElementById('changePwBtn');btn.disabled=true;btn.textContent='Updating...';
+  try{
+    var cred=firebase.auth.EmailAuthProvider.credential(CU.email,cur);
+    await CU.reauthenticateWithCredential(cred);
+    await CU.updatePassword(nw);
+    document.getElementById('cpCur').value='';document.getElementById('cpNew').value='';document.getElementById('cpCon').value='';
+    showAlert('cpOk','✓ Password updated successfully');
+    setTimeout(function(){hideAlert('cpOk');},4000);
+  }catch(e){showAlert('cpErr',e.code==='auth/wrong-password'?'Current password is incorrect.':e.message);}
+  finally{btn.disabled=false;btn.textContent='Update Password';}
+}
+
+// ── TABS ──
+document.querySelectorAll('.tab-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var tab=this.getAttribute('data-tab');
+    document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+    document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
+    this.classList.add('active');
+    document.getElementById('tab-'+tab).classList.add('active');
+    if(tab==='manageUsers')loadManagedUsers();
+  });
 });
-document.getElementById('signInBtn').addEventListener('click', doSignIn);
-document.getElementById('pwInput').addEventListener('keydown', function(e){ if(e.key==='Enter') doSignIn(); });
-document.getElementById('logoutBtn').addEventListener('click', doLogout);
-document.getElementById('masterToggle').addEventListener('change', toggleFilter);
-document.querySelectorAll('.mode-pill').forEach(function(btn){
-  btn.addEventListener('click', function(){ setMode(this.getAttribute('data-m')); });
-});
-document.getElementById('intensityRange').addEventListener('input', function(){
+
+// ── EVENTS ──
+document.getElementById('landBtn').addEventListener('click',function(){showScreen('screenUsers');});
+document.getElementById('backToLand').addEventListener('click',function(){showScreen('screenLanding');});
+document.getElementById('backToUsers').addEventListener('click',function(){showScreen('screenUsers');});
+document.getElementById('backBtn2').addEventListener('click',function(){showScreen('screenUsers');});
+document.getElementById('signInBtn').addEventListener('click',doSignIn);
+document.getElementById('pwInput').addEventListener('keydown',function(e){if(e.key==='Enter')doSignIn();});
+document.getElementById('logoutBtn').addEventListener('click',doLogout);
+document.getElementById('masterTog').addEventListener('change',toggleFilter);
+document.querySelectorAll('.pill').forEach(function(b){b.addEventListener('click',function(){setMode(this.getAttribute('data-m'));});});
+document.getElementById('intR').addEventListener('input',function(){
   intensity=parseInt(this.value);
-  document.getElementById('intVal').textContent=this.value;
-  document.getElementById('statIntensity').textContent=this.value;
-  if(filterOn) broadcastFilter(true);
+  document.getElementById('intV').textContent=this.value;
+  document.getElementById('stInt').textContent=this.value;
+  if(filterOn){var s=document.getElementById('__sg');if(s)s.textContent='html{filter:'+buildCSS()+'!important}';}
+  updateBookmarklet();
 });
-document.getElementById('blurRange').addEventListener('input', function(){
-  blurAmount=parseInt(this.value);
-  document.getElementById('blurVal').textContent=this.value;
-  if(filterOn) broadcastFilter(true);
+document.getElementById('blurR').addEventListener('input',function(){
+  blurAmt=parseInt(this.value);
+  document.getElementById('blurV').textContent=this.value;
+  document.getElementById('stBlur').textContent=this.value;
+  if(filterOn){var s=document.getElementById('__sg');if(s)s.textContent='html{filter:'+buildCSS()+'!important}';}
+  updateBookmarklet();
 });
-document.getElementById('addUrlBtn').addEventListener('click', addUrl);
-document.getElementById('urlInput').addEventListener('keydown', function(e){ if(e.key==='Enter') addUrl(); });
-document.getElementById('addUserBtn').addEventListener('click', addUser);
-document.addEventListener('keydown', function(e){
-  if(!currentUser) return;
-  if(e.code==='Space'&&e.target===document.body){ e.preventDefault(); var t=document.getElementById('masterToggle'); t.checked=!t.checked; toggleFilter(); }
-  if((e.ctrlKey||e.metaKey)&&e.key==='h'){ e.preventDefault(); var t=document.getElementById('masterToggle'); t.checked=!t.checked; toggleFilter(); }
+document.getElementById('addUserBtn').addEventListener('click',addUser);
+document.getElementById('changePwBtn').addEventListener('click',changePassword);
+document.addEventListener('keydown',function(e){
+  if(!CU)return;
+  if(e.code==='Space'&&e.target===document.body){e.preventDefault();var t=document.getElementById('masterTog');t.checked=!t.checked;toggleFilter();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='h'){e.preventDefault();var t=document.getElementById('masterTog');t.checked=!t.checked;toggleFilter();}
 });
 
-// ── BOOT ───────────────────────────────────────
 boot();
 </script>
 </body>
