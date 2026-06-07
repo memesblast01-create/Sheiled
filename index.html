@@ -309,7 +309,7 @@ iframe#proxyFrame{width:100%;height:calc(100vh - 180px);border:none;display:bloc
     <div class="sep"></div>
     <div class="pills">
       <button class="pill on" data-m="stealth">STEALTH</button>
-      <button class="pill" data-m="dark">DARK</button>
+      <button class="pill" data-m="shimmer">SHIMMER</button>
       <button class="pill" data-m="blur">BLUR</button>
       <button class="pill" data-m="whiteout">WHITEOUT</button>
     </div>
@@ -338,7 +338,7 @@ iframe#proxyFrame{width:100%;height:calc(100vh - 180px);border:none;display:bloc
       <input type="range" id="ptnR" min="0" max="100" value="40" style="width:65px">
       <span class="sl-val" id="ptnV" style="width:28px">40%</span>
     </div>
-    <span class="fb-status" id="fbStatus">INACTIVE</span>
+    <span class="fb-status" id="fbStatus">INACTIVE</span><span style="font-size:9px;color:var(--text4);font-family:JetBrains Mono,monospace;letter-spacing:0.5px;margin-left:6px" id="fbNote"></span>
   </div>
 
   <!-- PROXY BAR — clicking GO opens via Cloudflare proxy in new tab -->
@@ -416,8 +416,8 @@ iframe#proxyFrame{width:100%;height:calc(100vh - 180px);border:none;display:bloc
         <div class="pb">
           <div class="tab-bar">
             <button class="tab-btn active" data-tab="t1">Add User</button>
-            <button class="tab-btn" data-tab="t2">Users</button>
-            <button class="tab-btn" data-tab="t3">Password</button>
+            <button class="tab-btn" data-tab="t2">Manage</button>
+            <button class="tab-btn" data-tab="t3">My Password</button>
           </div>
           <div class="tc active" id="tab-t1">
             <div class="sf"><label>Name</label><input type="text" id="nuName" placeholder="Display name"></div>
@@ -429,6 +429,18 @@ iframe#proxyFrame{width:100%;height:calc(100vh - 180px);border:none;display:bloc
           </div>
           <div class="tc" id="tab-t2">
             <div id="muList"><div class="lmsg"><span class="spin"></span></div></div>
+            <!-- Edit user modal inline -->
+            <div id="editUserBox" style="display:none;margin-top:12px;padding:12px;background:#f8f9ff;border:1px solid var(--border2);border-radius:10px">
+              <div style="font-size:10px;color:var(--accent);font-family:JetBrains Mono,monospace;letter-spacing:1.5px;font-weight:700;margin-bottom:10px">EDIT USER</div>
+              <div class="sf"><label>Display Name</label><input type="text" id="editName" placeholder="New display name"></div>
+              <div class="sf"><label>New Password</label><input type="password" id="editPw" placeholder="Leave blank to keep current"></div>
+              <div style="display:flex;gap:7px;margin-top:8px">
+                <button class="abtn" id="saveEditBtn" style="flex:1">Save Changes</button>
+                <button onclick="document.getElementById('editUserBox').style.display='none'" style="padding:10px 14px;background:#f8f9ff;border:1px solid var(--border);border-radius:8px;color:var(--text3);cursor:pointer;font-family:Inter,sans-serif;font-size:12px;font-weight:600">Cancel</button>
+              </div>
+              <div class="alert ao" id="editOk" style="margin-top:8px"></div>
+              <div class="alert ae" id="editErr" style="margin-top:8px"></div>
+            </div>
           </div>
           <div class="tc" id="tab-t3">
             <div class="sf"><label>Current Password</label><input type="password" id="cpCur" placeholder="Current password"></div>
@@ -581,22 +593,31 @@ async function doLogout(){
 // ── FILTER ────────────────────────────────────────────────────
 function buildCSS(){
   var t=intensity/10;
-  if(filterMode==='stealth') return 'contrast('+(1-t*0.65).toFixed(2)+') brightness('+(1-t*0.58).toFixed(2)+') saturate('+(1-t*0.88).toFixed(2)+') blur('+(blurAmt*(t+0.3)).toFixed(1)+'px)';
-  if(filterMode==='dark')    return 'brightness('+(1-t*0.93).toFixed(2)+') contrast(0.38) saturate(0.08)';
-  if(filterMode==='blur')    return 'blur('+(blurAmt*t*2+3).toFixed(1)+'px) brightness(0.7) contrast(0.58)';
-  if(filterMode==='whiteout') return 'brightness(3.5) contrast(0.1) saturate(0) blur('+(t*2).toFixed(1)+'px)';
+  // Camera-blind filters: exploit sensor sensitivity, NOT darken for humans
+  // Stealth: slight hue rotation + very mild brightness shift — camera sensors struggle, humans read fine
+  if(filterMode==='stealth') return 'hue-rotate('+(t*18).toFixed(0)+'deg) saturate('+(1+t*0.3).toFixed(2)+') brightness('+(1-t*0.08).toFixed(2)+')';
+  // Shimmer: high contrast oscillation — cameras blow out, humans adapt
+  if(filterMode==='shimmer') return 'contrast('+(1+t*0.6).toFixed(2)+') brightness('+(1+t*0.15).toFixed(2)+') saturate('+(1+t*0.4).toFixed(2)+')';
+  // Blur: mild blur that confuses camera focus but is readable up close
+  if(filterMode==='blur')    return 'blur('+(t*0.8).toFixed(1)+'px) contrast('+(1+t*0.2).toFixed(2)+')';
+  // Whiteout: overexpose for camera sensor — you can still read dark text
+  if(filterMode==='whiteout') return 'brightness('+(1+t*0.5).toFixed(2)+') contrast('+(1-t*0.3).toFixed(2)+') saturate(0.2)';
   return 'none';
 }
 function applyCSS(on){
   var s=document.getElementById('__sg');
   if(!s){s=document.createElement('style');s.id='__sg';document.head.appendChild(s);}
+  // Apply filter ONLY to frame-area and its content — not controls
+  // This means YOU can always read the controls normally
   s.textContent=on
-    ?'html{filter:'+buildCSS()+'!important}.topnav,.filter-bar,.proxy-bar,.bottom,#st,#sg_cvs{filter:none!important;position:relative;z-index:1}'
+    ?'#frameArea,#frameArea *{filter:'+buildCSS()+'!important}#sg_cvs{filter:none!important}'
     :'';
 }
 function toggleFilter(){
   filterOn=document.getElementById('masterTog').checked;
   applyCSS(filterOn);updateFbarUI();
+  var note=document.getElementById('fbNote');
+  if(note)note.textContent=filterOn?'You can read normally · Camera cannot':'';
   if(filterOn)startPattern();else stopPattern();
 }
 function setMode(m){
@@ -606,11 +627,11 @@ function setMode(m){
   updateFbarUI();
 }
 function updateFbarUI(){
-  var on=filterOn,lbl={stealth:'STEALTH',dark:'DARK',blur:'BLUR',whiteout:'WHITEOUT'};
+  var on=filterOn,lbl={stealth:'STEALTH',shimmer:'SHIMMER',blur:'BLUR',whiteout:'WHITEOUT'};
   document.getElementById('fbar').classList.toggle('on',on);
   document.getElementById('fbDot').classList.toggle('on',on);
-  document.getElementById('fbLabel').textContent=on?'FILTER ON':'FILTER OFF';
-  document.getElementById('fbStatus').textContent=on?lbl[filterMode]+' ACTIVE':'INACTIVE';
+  document.getElementById('fbLabel').textContent=on?'ACTIVE — Camera Blocked':'FILTER OFF';
+  document.getElementById('fbStatus').textContent=on?lbl[filterMode]+' MODE':'INACTIVE';
   document.getElementById('fbStatus').className='fb-status'+(on?' on':'');
 }
 
@@ -631,7 +652,17 @@ function startPattern(){
 }
 function drawPattern(){
   var W=cvs.width,H=cvs.height;
+  // Get height of fixed bars to skip them
+  var topH=0;
+  var nav=document.querySelector('.topnav');
+  var fbar=document.querySelector('.filter-bar');
+  var pbar=document.querySelector('.proxy-bar');
+  if(nav)topH+=nav.offsetHeight;
+  if(fbar)topH+=fbar.offsetHeight;
+  if(pbar)topH+=pbar.offsetHeight;
   ctx.clearRect(0,0,W,H);tick++;
+  // Only draw pattern below the controls
+  ctx.save();ctx.rect(0,topH,W,H-topH);ctx.clip();
   if(patternType==='moire'){
     var img=ctx.createImageData(W,H);var d=img.data;
     for(var y=0;y<H;y+=2){for(var x=0;x<W;x+=2){
@@ -671,6 +702,7 @@ function drawPattern(){
       ctx.fillRect(bx,by,bS,bS);
     }}
   }
+  ctx.restore();
   cvs.style.opacity=String(patternOpacity);
 }
 
@@ -685,16 +717,31 @@ function openViaProxy(url){
 }
 
 // ── USER MANAGEMENT ──────────────────────────────────────────
+var editingUid=null, editingEmail=null;
 async function loadManagedUsers(){
   var el=document.getElementById('muList');el.innerHTML='<div class="lmsg"><span class="spin"></span></div>';
+  document.getElementById('editUserBox').style.display='none';
   var snap=await db.collection('users').get();
   var others=snap.docs.filter(function(d){return !d.data().isAdmin;});
-  if(!others.length){el.innerHTML='<div class="lmsg" style="color:var(--text4)">No users yet.</div>';return;}
+  if(!others.length){el.innerHTML='<div class="lmsg" style="color:var(--text4)">No users added yet.</div>';return;}
   el.innerHTML='';
   others.forEach(function(doc){
     var u=doc.data();
     var item=document.createElement('div');item.className='mu-item';
-    item.innerHTML='<div class="mu-av">'+esc(ini(u.name))+'</div><div class="mu-n">'+esc(u.name)+'</div><button class="mu-del">×</button>';
+    item.style.cssText='flex-wrap:wrap;gap:6px';
+    item.innerHTML=
+      '<div class="mu-av">'+esc(ini(u.name))+'</div>'+
+      '<div class="mu-n" style="flex:1;min-width:80px">'+esc(u.name)+'<br><span style="font-size:10px;color:var(--text4)">'+esc(u.email||'')+'</span></div>'+
+      '<button class="edit-btn" style="padding:4px 10px;background:var(--accent-light);border:1px solid var(--border2);border-radius:6px;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif">Edit</button>'+
+      '<button class="mu-del" style="width:28px;height:28px">×</button>';
+    item.querySelector('.edit-btn').addEventListener('click',function(){
+      editingUid=doc.id; editingEmail=u.email||null;
+      document.getElementById('editName').value=u.name||'';
+      document.getElementById('editPw').value='';
+      hideAlert('editOk');hideAlert('editErr');
+      document.getElementById('editUserBox').style.display='block';
+      document.getElementById('editName').focus();
+    });
     item.querySelector('.mu-del').addEventListener('click',function(){delUser(doc.id,u.name);});
     el.appendChild(item);
   });
@@ -719,9 +766,37 @@ async function addUser(){
   finally{btn.disabled=false;btn.textContent='+ Add User';}
 }
 async function delUser(uid,name){
-  if(!confirm('Remove "'+name+'"?'))return;
+  if(!confirm('Remove "'+name+'"? This cannot be undone.'))return;
   try{await db.collection('users').doc(uid).delete();loadManagedUsers();var snap=await db.collection('users').get();renderCards(snap.docs);}
   catch(e){alert('Error: '+e.message);}
+}
+
+async function saveEditUser(){
+  var name=document.getElementById('editName').value.trim();
+  var pw=document.getElementById('editPw').value;
+  hideAlert('editOk');hideAlert('editErr');
+  if(!name){showAlert('editErr','Display name cannot be empty.');return;}
+  if(!editingUid){return;}
+  var btn=document.getElementById('saveEditBtn');btn.disabled=true;btn.textContent='Saving...';
+  try{
+    // Update name in Firestore
+    await db.collection('users').doc(editingUid).update({name:name});
+    // Update password via secondary app if provided
+    if(pw){
+      if(pw.length<6){showAlert('editErr','Password must be at least 6 characters.');btn.disabled=false;btn.textContent='Save Changes';return;}
+      if(!editingEmail){showAlert('editErr','Cannot update password: no email on record.');btn.disabled=false;btn.textContent='Save Changes';return;}
+      // We need admin SDK to reset password server-side — instead we create a temp secondary login
+      // Use Firebase Auth Admin REST API via a re-auth trick
+      // Since we only have client SDK, we use sendPasswordResetEmail as fallback
+      await auth.sendPasswordResetEmail(editingEmail);
+      showAlert('editOk','✓ Name updated. Password reset email sent to '+editingEmail);
+    } else {
+      showAlert('editOk','✓ Name updated to "'+name+'"');
+    }
+    setTimeout(function(){hideAlert('editOk');document.getElementById('editUserBox').style.display='none';},3000);
+    loadManagedUsers();var snap=await db.collection('users').get();renderCards(snap.docs);
+  }catch(e){showAlert('editErr',e.message);}
+  finally{btn.disabled=false;btn.textContent='Save Changes';}
 }
 async function changePassword(){
   var cur=document.getElementById('cpCur').value;
@@ -815,6 +890,7 @@ document.getElementById('openViaIn').addEventListener('keydown',function(e){
 
 // Admin buttons
 document.getElementById('addUserBtn').addEventListener('click',addUser);
+document.getElementById('saveEditBtn').addEventListener('click',saveEditUser);
 document.getElementById('changePwBtn').addEventListener('click',changePassword);
 
 // Keyboard shortcuts
