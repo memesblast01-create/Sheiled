@@ -306,12 +306,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
       <div class="pills">
         <button class="pill on" data-m="stealth">STEALTH</button>
         <button class="pill" data-m="shimmer">SHIMMER</button>
-        <button class="pill" data-m="blur">BLUR</button>
         <button class="pill" data-m="whiteout">WHITEOUT</button>
+        <button class="pill" data-m="none">NONE</button>
       </div>
       <div class="sep"></div>
       <select class="ptn-sel" id="patternSel">
         <option value="none">No Pattern</option>
+        <option value="blur">Blur (Focus Defeat)</option>
         <option value="moire">Moiré Pattern</option>
         <option value="rolling">Rolling Shutter</option>
         <option value="refresh">Refresh Mismatch</option>
@@ -353,7 +354,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
       </div>
     </div>
     <iframe id="proxyFrame" style="display:none;width:100%;height:100%;border:none"
-      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation">
+      referrerpolicy="no-referrer-when-downgrade">
     </iframe>
   </div>
 </div>
@@ -422,7 +423,11 @@ var CU=null, CP=null, pendingEmail=null;
 var filterOn=false, filterMode='stealth', intensity=5, blurAmt=2;
 var patternType='none', patternOpacity=0.35;
 var animFrame=null, tick=0, editingUid=null, editingEmail=null;
-var WORKER=localStorage.getItem('sg_worker')||'https://shy-lake-cdc0screengaurd.memesblast01.workers.dev';
+var WORKER=(function(){
+  var stored=localStorage.getItem('sg_worker');
+  if(stored&&stored.startsWith('http'))return stored;
+  return 'https://shy-lake-cdc0screengaurd.memesblast01.workers.dev';
+})();
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function ini(n){return n.split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2)||'?';}
@@ -514,38 +519,44 @@ async function doLogout(){
 function navigate(url){
   if(!url)return;
   url=url.trim();
-  // If it looks like a search term (no dots or spaces), search Google
-  if(!url.includes('.')&&!url.startsWith('http')){
-    url='https://www.google.com/search?q='+encodeURIComponent(url);
-  } else if(!url.match(/^https?:\/\//)){
-    url='https://'+url;
+  if(!url){return;}
+  // Search term detection
+  if(!url.startsWith('http')&&!url.startsWith('//')){
+    // Has a dot and no spaces = likely a domain
+    if(url.includes('.')&&!url.includes(' ')){
+      url='https://'+url;
+    } else {
+      // Search query
+      url='https://www.google.com/search?q='+encodeURIComponent(url);
+    }
   }
-  // Route through worker proxy so filter is injected server-side too
-  var proxyUrl=WORKER+'?url='+encodeURIComponent(url);
   document.getElementById('urlInput').value=url;
   document.getElementById('homeScreen').style.display='none';
   var f=document.getElementById('proxyFrame');
   f.style.display='block';
-  f.src=proxyUrl;
+  // Always route through proxy worker — handles all sites
+  f.src=WORKER+'?url='+encodeURIComponent(url);
 }
 
 // ── FILTER ───────────────────────────────────────────────────
 function buildFilterCSS(){
   var t=intensity/10;
-  // Camera-confusing filters — human readable
+  if(filterMode==='none')    return 'none';
   if(filterMode==='stealth') return 'hue-rotate('+(t*20).toFixed(0)+'deg) saturate('+(1+t*0.25).toFixed(2)+') brightness('+(1-t*0.06).toFixed(2)+')';
   if(filterMode==='shimmer') return 'contrast('+(1+t*0.55).toFixed(2)+') brightness('+(1+t*0.12).toFixed(2)+') saturate('+(1+t*0.35).toFixed(2)+')';
-  if(filterMode==='blur')    return 'blur('+(t*0.7).toFixed(1)+'px) contrast('+(1+t*0.18).toFixed(2)+')';
   if(filterMode==='whiteout') return 'brightness('+(1+t*0.45).toFixed(2)+') contrast('+(1-t*0.25).toFixed(2)+') saturate(0.3)';
   return 'none';
 }
 function applyFilter(on){
   var s=document.getElementById('__sg');
   if(!s){s=document.createElement('style');s.id='__sg';document.head.appendChild(s);}
-  // Only apply to the iframe/browser area — NOT the controls
-  s.textContent=on
-    ?'.browser-area{filter:'+buildFilterCSS()+'!important}.topbar,.topbar *,#adminPanel,#adminPanel *,#st,#sg_cvs{filter:none!important}'
-    :'';
+  var css=buildFilterCSS();
+  // Only apply to browser-area, never to controls or topbar
+  if(on && css!=='none'){
+    s.textContent='.browser-area{filter:'+css+'!important}.topbar,.topbar *,#adminPanel,#adminPanel *,#st,#sg_cvs{filter:none!important}';
+  } else {
+    s.textContent='.browser-area{filter:none!important}';
+  }
 }
 function toggleFilter(){
   filterOn=document.getElementById('masterTog').checked;
@@ -559,7 +570,7 @@ function setMode(m){
   updateFilterUI();
 }
 function updateFilterUI(){
-  var on=filterOn,lbl={stealth:'STEALTH',shimmer:'SHIMMER',blur:'BLUR',whiteout:'WHITEOUT'};
+  var on=filterOn,lbl={stealth:'STEALTH',shimmer:'SHIMMER',whiteout:'WHITEOUT',none:'NONE (PATTERN ONLY)'};
   document.getElementById('fbar').classList.toggle('on',on);
   document.getElementById('fbDot').classList.toggle('on',on);
   document.getElementById('fbLbl').textContent=on?'FILTER ACTIVE':'FILTER OFF';
@@ -592,7 +603,23 @@ function startPattern(){
 }
 function drawPattern(){
   var W=cvs.width,H=cvs.height;ctx.clearRect(0,0,W,H);tick++;
-  if(patternType==='moire'){
+  if(patternType==='blur'){
+    // Blur pattern — CSS blur on canvas overlay (creates focus-defeat effect)
+    ctx.filter='blur('+(3+patternOpacity*8).toFixed(1)+'px)';
+    ctx.fillStyle='rgba(255,255,255,0.01)';
+    ctx.fillRect(0,0,W,H);
+    ctx.filter='none';
+    // Soft noise to defeat autofocus
+    var imgB=ctx.createImageData(W,H);var dB=imgB.data;
+    for(var jb=0;jb<dB.length;jb+=16){
+      var nb=Math.floor(Math.random()*40);
+      dB[jb]=dB[jb+1]=dB[jb+2]=nb;dB[jb+3]=18;
+      dB[jb+4]=dB[jb+5]=dB[jb+6]=nb;dB[jb+7]=18;
+      dB[jb+8]=dB[jb+9]=dB[jb+10]=nb;dB[jb+11]=18;
+      dB[jb+12]=dB[jb+13]=dB[jb+14]=nb;dB[jb+15]=18;
+    }
+    ctx.putImageData(imgB,0,0);
+  }else if(patternType==='moire'){
     var img=ctx.createImageData(W,H);var d=img.data;
     for(var y=0;y<H;y+=2){for(var x=0;x<W;x+=2){
       var v=(Math.sin(x*0.15+y*0.07)*Math.sin(x*0.09-y*0.13)+Math.sin((x+tick*0.4)*0.18)*Math.sin((y+tick*0.3)*0.12))/2;
