@@ -439,6 +439,10 @@ function showApp(){document.querySelectorAll('.screen').forEach(function(s){s.cl
 
 // ── BOOT ─────────────────────────────────────────────────────
 async function boot(){
+  // Force filter OFF on page load
+  var s=document.createElement('style');s.id='__sg';
+  s.textContent='.browser-area{filter:none!important}';
+  document.head.appendChild(s);
   try{
     var snap=await db.collection('users').get();
     if(snap.empty){await seedAdmin();}else{renderCards(snap.docs);}
@@ -535,7 +539,8 @@ function navigate(url){
   var f=document.getElementById('proxyFrame');
   f.style.display='block';
   // Always route through proxy worker — handles all sites
-  f.src=WORKER+'?url='+encodeURIComponent(url);
+  // Load directly — CSS filter on .browser-area handles visual effect
+  f.src=url;
 }
 
 // ── FILTER ───────────────────────────────────────────────────
@@ -551,11 +556,10 @@ function applyFilter(on){
   var s=document.getElementById('__sg');
   if(!s){s=document.createElement('style');s.id='__sg';document.head.appendChild(s);}
   var css=buildFilterCSS();
-  // Only apply to browser-area, never to controls or topbar
   if(on && css!=='none'){
-    s.textContent='.browser-area{filter:'+css+'!important}.topbar,.topbar *,#adminPanel,#adminPanel *,#st,#sg_cvs{filter:none!important}';
+    s.textContent='.browser-area{filter:'+css+'!important}.topbar{filter:none!important}#adminPanel{filter:none!important}#st{filter:none!important}#sg_cvs{filter:none!important}';
   } else {
-    s.textContent='.browser-area{filter:none!important}';
+    s.textContent='.browser-area{filter:none!important}.topbar{filter:none!important}';
   }
 }
 function toggleFilter(){
