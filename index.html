@@ -539,8 +539,8 @@ function navigate(url){
   var f=document.getElementById('proxyFrame');
   f.style.display='block';
   // Always route through proxy worker — handles all sites
-  // Load directly — CSS filter on .browser-area handles visual effect
-  f.src=url;
+  // Route through worker (handles X-Frame-Options stripping for YouTube etc)
+  f.src=WORKER+'?url='+encodeURIComponent(url);
 }
 
 // ── FILTER ───────────────────────────────────────────────────
