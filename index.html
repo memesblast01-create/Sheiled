@@ -102,10 +102,12 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .fb-lbl{font-size:10px;font-weight:700;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:0.5px;transition:color 0.2s;white-space:nowrap}
 .filter-row.on .fb-lbl{color:var(--red2)}
 .sep{width:1px;height:16px;background:var(--border);flex-shrink:0}
-.pills{display:flex;gap:3px}
-.pill{padding:3px 9px;border-radius:5px;font-size:9px;font-weight:700;border:1px solid var(--border);background:#f8f9ff;color:var(--text3);cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all 0.15s;letter-spacing:0.5px;white-space:nowrap}
-.pill:hover{border-color:var(--border2);color:var(--accent)}
-.pill.on{background:var(--al);border-color:var(--border2);color:var(--accent)}
+.tog{position:relative;width:40px;height:22px;cursor:pointer;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tog-t{position:absolute;inset:0;background:#e5e7eb;border-radius:11px;transition:all 0.3s}
+.tog input:checked+.tog-t{background:var(--red);box-shadow:0 0 8px rgba(239,68,68,0.3)}
+.tog-k{position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:all 0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.15)}
+.tog input:checked~.tog-k{transform:translateX(18px)}
 .ptn-sel{background:#f8f9ff;border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:9px;font-family:'JetBrains Mono',monospace;padding:3px 8px;cursor:pointer;outline:none;max-width:160px}
 .sl-grp{display:flex;align-items:center;gap:5px}
 .sl-lbl{font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:0.5px;white-space:nowrap;font-weight:500}
@@ -241,17 +243,13 @@ kbd{background:#f1f3fd;border:1px solid var(--border2);border-radius:4px;padding
     <div class="filter-row" id="fbar">
       <div class="fb-dot" id="fbDot"></div>
       <span class="fb-lbl" id="fbLbl">FILTER OFF</span>
-      <div class="sep"></div>
-      <div class="pills">
-        <button class="pill on" data-m="stealth">STEALTH</button>
-        <button class="pill" data-m="shimmer">SHIMMER</button>
-        <button class="pill" data-m="whiteout">WHITEOUT</button>
-        <button class="pill" data-m="none">NONE</button>
-      </div>
+      <label class="tog">
+        <input type="checkbox" id="masterTog">
+        <div class="tog-t"></div>
+        <div class="tog-k"></div>
+      </label>
       <div class="sep"></div>
       <select class="ptn-sel" id="patternSel">
-        <option value="none">No Pattern</option>
-        <option value="blur">Blur (Focus Defeat)</option>
         <option value="moire">Moiré Pattern</option>
         <option value="rolling">Rolling Shutter</option>
         <option value="refresh">Refresh Mismatch</option>
@@ -262,6 +260,7 @@ kbd{background:#f1f3fd;border:1px solid var(--border2);border-radius:4px;padding
         <option value="polar">Polarization</option>
         <option value="interleave">Frame Interleave</option>
         <option value="adversarial">AI Adversarial</option>
+        <option value="blur">Blur (Focus Defeat)</option>
       </select>
       <div class="sep"></div>
       <div class="sl-grp">
@@ -368,7 +367,7 @@ const FB={apiKey:"AIzaSyCdQMCQUmYsnyy817fqXOO09MscKhE-4Cw",authDomain:"screengau
 firebase.initializeApp(FB);
 var auth=firebase.auth(), db=firebase.firestore();
 var CU=null, CP=null, pendingEmail=null;
-var filterMode='stealth', intensity=5;
+var filterOn=false, patternType='moire', intensity=5;
 var editingUid=null, editingEmail=null;
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -382,10 +381,18 @@ function showApp(){document.querySelectorAll('.screen').forEach(function(s){s.cl
 function buildBookmarklet(){
   var t = intensity/10;
   var css;
-  if(filterMode==='stealth')      css = 'hue-rotate('+(t*20).toFixed(0)+'deg) saturate('+(1+t*0.25).toFixed(2)+') brightness('+(1-t*0.06).toFixed(2)+')';
-  else if(filterMode==='shimmer') css = 'contrast('+(1+t*0.55).toFixed(2)+') brightness('+(1+t*0.12).toFixed(2)+') saturate('+(1+t*0.35).toFixed(2)+')';
-  else if(filterMode==='whiteout')css = 'brightness('+(1+t*0.45).toFixed(2)+') contrast('+(1-t*0.25).toFixed(2)+') saturate(0.3)';
-  else                            css = 'contrast(1.5) hue-rotate(25deg) saturate(1.4) brightness(1.05)';
+  if(patternType==='moire')        css = "contrast(1.4) saturate(1.3) hue-rotate(15deg) brightness(1.05)";
+  else if(patternType==='rolling') css = "contrast(1.35) brightness(1.08) saturate(1.2)";
+  else if(patternType==='refresh') css = "contrast(1.3) brightness(0.97) saturate(1.25) hue-rotate(8deg)";
+  else if(patternType==='dither')  css = "contrast(1.45) saturate(0.85) brightness(1.04)";
+  else if(patternType==='pwm')     css = "brightness(1.15) contrast(1.2) saturate(1.1)";
+  else if(patternType==='alias')   css = "contrast(1.5) saturate(1.4) hue-rotate(20deg)";
+  else if(patternType==='subpixel')css = "saturate(1.5) contrast(1.25) hue-rotate(10deg)";
+  else if(patternType==='polar')   css = "contrast(1.3) brightness(1.1) hue-rotate(30deg) saturate(1.3)";
+  else if(patternType==='interleave') css = "contrast(1.4) brightness(0.95) saturate(1.15)";
+  else if(patternType==='adversarial') css = "contrast(1.6) hue-rotate(35deg) saturate(1.5) brightness(1.05)";
+  else if(patternType==='blur')    css = "blur("+(t*1.2).toFixed(1)+"px) contrast(1.15)";
+  else                              css = "contrast(1.4) hue-rotate(20deg) saturate(1.3)";
 
   var code = "javascript:(function(){var id='__sg_bm_style';var ex=document.getElementById(id);if(ex){ex.remove();return;}var s=document.createElement('style');s.id=id;s.textContent='html{filter:"+css+" !important;}';document.head.appendChild(s);})();";
   return code;
@@ -456,6 +463,7 @@ function launchApp(){
   document.getElementById('navName').textContent=name;
   document.getElementById('navAv').textContent=ini(name);
   if(CP&&CP.isAdmin){document.getElementById('adminToggleBtn').style.display='block';}
+  document.getElementById('patternSel').value = patternType;
   refreshBookmarklet();
   showApp();
 }
@@ -469,12 +477,15 @@ async function doLogout(){
   showScreen('sLand');
 }
 
-function setMode(m){
-  filterMode=m;
-  document.querySelectorAll('.pill').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-m')===m);});
-  document.getElementById('fbar').classList.toggle('on', m!=='none');
-  document.getElementById('fbDot').classList.toggle('on', m!=='none');
-  document.getElementById('fbLbl').textContent = m==='none' ? 'FILTER OFF' : 'MODE: '+m.toUpperCase();
+function toggleFilter(){
+  filterOn = document.getElementById('masterTog').checked;
+  document.getElementById('fbar').classList.toggle('on', filterOn);
+  document.getElementById('fbDot').classList.toggle('on', filterOn);
+  document.getElementById('fbLbl').textContent = filterOn ? 'FILTER ON' : 'FILTER OFF';
+  refreshBookmarklet();
+}
+function setPattern(p){
+  patternType = p;
   refreshBookmarklet();
 }
 
@@ -590,7 +601,8 @@ document.getElementById('signInBtn').addEventListener('click',doSignIn);
 document.getElementById('pwInput').addEventListener('keydown',function(e){if(e.key==='Enter')doSignIn();});
 document.getElementById('logoutBtn').addEventListener('click',doLogout);
 
-document.querySelectorAll('.pill').forEach(function(b){b.addEventListener('click',function(){setMode(this.getAttribute('data-m'));});});
+document.getElementById('masterTog').addEventListener('change', toggleFilter);
+document.getElementById('patternSel').addEventListener('change', function(){ setPattern(this.value); });
 document.getElementById('intR').addEventListener('input',function(){
   intensity=parseInt(this.value);document.getElementById('intV').textContent=this.value;
   refreshBookmarklet();
