@@ -419,8 +419,8 @@ function buildBookmarklet(){
         for(var y=0;y<H;y+=2){for(var x=0;x<W;x+=2){
           var v=(Math.sin(x*0.15+y*0.07)*Math.sin(x*0.09-y*0.13)+Math.sin((x+tick*0.4)*0.18)*Math.sin((y+tick*0.3)*0.12))/2;
           var c=v>0?255:0;var i=(y*W+x)*4;
-          d[i]=d[i+1]=d[i+2]=c;d[i+3]=Math.floor(op*180);
-          d[i+4]=d[i+5]=d[i+6]=c;d[i+7]=Math.floor(op*180);
+          d[i]=d[i+1]=d[i+2]=c;d[i+3]=Math.floor(op*255);
+          d[i+4]=d[i+5]=d[i+6]=c;d[i+7]=Math.floor(op*255);
         }}
         ctx.putImageData(img,0,0);
 
@@ -430,7 +430,7 @@ function buildBookmarklet(){
           var y2=(off+r*(H/7))%H;
           var g=ctx.createLinearGradient(0,y2-25,0,y2+25);
           g.addColorStop(0,'rgba(255,255,255,0)');
-          g.addColorStop(0.5,'rgba(255,255,255,'+(op*0.4)+')');
+          g.addColorStop(0.5,'rgba(255,255,255,'+(op*0.85)+')');
           g.addColorStop(1,'rgba(255,255,255,0)');
           ctx.fillStyle=g;
           ctx.fillRect(0,y2-25,W,50);
@@ -439,28 +439,28 @@ function buildBookmarklet(){
       } else if(PAT==='refresh'){
         var gap=Math.max(3,Math.floor(60-INT*4));
         for(var yy=(tick*3)%gap;yy<H;yy+=gap){
-          ctx.fillStyle='rgba(0,0,0,'+(op*0.3)+')';
-          ctx.fillRect(0,yy,W,2);
+          ctx.fillStyle='rgba(0,0,0,'+(op*0.7)+')';
+          ctx.fillRect(0,yy,W,3);
         }
 
       } else if(PAT==='dither'){
         var img2=ctx.createImageData(W,H);var d2=img2.data;
         for(var j=0;j<d2.length;j+=4){
           var n=Math.random()>0.5?255:0;
-          d2[j]=d2[j+1]=d2[j+2]=n;d2[j+3]=op*70;
+          d2[j]=d2[j+1]=d2[j+2]=n;d2[j+3]=op*200;
         }
         ctx.putImageData(img2,0,0);
 
       } else if(PAT==='pwm'){
         var cycle=Math.max(2,12-INT);
         if(Math.floor(tick/cycle)%2===0){
-          ctx.fillStyle='rgba(255,255,255,'+(op*0.5)+')';
+          ctx.fillStyle='rgba(255,255,255,'+(op*0.85)+')';
           ctx.fillRect(0,0,W,H);
         }
 
       } else if(PAT==='alias'){
         var spacing=Math.max(2,8-Math.floor(INT/2));
-        ctx.strokeStyle='rgba(255,255,255,'+(op*0.45)+')';
+        ctx.strokeStyle='rgba(255,255,255,'+(op*0.85)+')';
         ctx.lineWidth=1;
         for(var xi=-(tick%spacing);xi<W+H;xi+=spacing){
           ctx.beginPath();ctx.moveTo(xi,0);ctx.lineTo(xi-H,H);ctx.stroke();
@@ -476,7 +476,7 @@ function buildBookmarklet(){
             d3[ii]=ch===0?255:0;
             d3[ii+1]=ch===1?255:0;
             d3[ii+2]=ch===2?255:0;
-            d3[ii+3]=op*40;
+            d3[ii+3]=op*150;
           }
         }}
         ctx.putImageData(img3,0,0);
@@ -486,7 +486,7 @@ function buildBookmarklet(){
         var g2=ctx.createRadialGradient(cx,cy,0,cx,cy,maxR);
         var ph=tick*0.03;
         for(var rv=0;rv<=1;rv+=0.07){
-          g2.addColorStop(rv,'rgba(255,255,255,'+(Math.abs(Math.sin(rv*Math.PI*8+ph))*op*0.35)+')');
+          g2.addColorStop(rv,'rgba(255,255,255,'+(Math.abs(Math.sin(rv*Math.PI*8+ph))*op*0.75)+')');
         }
         ctx.fillStyle=g2;
         ctx.fillRect(0,0,W,H);
@@ -494,8 +494,8 @@ function buildBookmarklet(){
       } else if(PAT==='interleave'){
         var startLine=tick%2===0?0:1;
         for(var yl=startLine;yl<H;yl+=2){
-          ctx.fillStyle='rgba(0,0,0,'+(op*0.35)+')';
-          ctx.fillRect(0,yl,W,1);
+          ctx.fillStyle='rgba(0,0,0,'+(op*0.8)+')';
+          ctx.fillRect(0,yl,W,2);
         }
 
       } else if(PAT==='adversarial'){
@@ -505,7 +505,7 @@ function buildBookmarklet(){
           var rr=seed%2===0?255:0;
           var gg=((seed+85)%2)===0?255:0;
           var bb=((seed+170)%2)===0?255:0;
-          ctx.fillStyle='rgba('+rr+','+gg+','+bb+','+(op*0.18)+')';
+          ctx.fillStyle='rgba('+rr+','+gg+','+bb+','+(op*0.5)+')';
           ctx.fillRect(bx,by,bS,bS);
         }}
 
@@ -514,7 +514,7 @@ function buildBookmarklet(){
         var imgB=ctx.createImageData(W,H);var dB=imgB.data;
         for(var jb=0;jb<dB.length;jb+=16){
           var nb=Math.floor(Math.random()*60);
-          dB[jb]=dB[jb+1]=dB[jb+2]=nb;dB[jb+3]=op*40;
+          dB[jb]=dB[jb+1]=dB[jb+2]=nb;dB[jb+3]=op*150;
         }
         ctx.putImageData(imgB,0,0);
         ctx.filter='none';
